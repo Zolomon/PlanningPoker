@@ -22,20 +22,26 @@ import spark.utils.IOUtils;
 public class Main {
 
 	public static void main(String[] args) {
+		final Configuration cfg = new Configuration();
+		try {
+
+			File file = new File(Thread.currentThread().getContextClassLoader()
+					.getResource("content/templates/").toURI());
+
+			cfg.setDirectoryForTemplateLoading(file);
+			cfg.setObjectWrapper(new DefaultObjectWrapper());
+
+		} catch (Exception e) {
+			System.err.println(e.getStackTrace());
+		}
 
 		staticFileRoute("/content");
-		
+
 		get(new Route("/hello") {
 			@Override
 			public Object handle(Request request, Response response) {
 
-				//Thread.currentThread().getContextClassLoader().getResourceAsStream("content/templates/test.ftl")
-				
-				Configuration cfg = new Configuration();
 				try {
-					File file = new File(Thread.currentThread().getContextClassLoader().getResource("content/templates/").toURI());
-					cfg.setDirectoryForTemplateLoading(file);
-					cfg.setObjectWrapper(new DefaultObjectWrapper());
 
 					/* Get or create a template */
 					Template temp = cfg.getTemplate("test.ftl");
@@ -49,15 +55,41 @@ public class Main {
 					latest.put("name", "green mouse");
 
 					/* Merge data-model with template */
-					
+
 					Writer out = new StringWriter();
 					temp.process(root, out);
 					return out.toString();
 
-				} catch (IOException | TemplateException | URISyntaxException e) {
+				} catch (IOException | TemplateException e) {
 					e.printStackTrace();
 				}
-				
+
+				return "Hello World...";
+			}
+		});
+
+		post(new Route("/task") {
+			@Override
+			public Object handle(Request request, Response response) {
+
+				try {
+					/* Get or create a template */
+					Template temp = cfg.getTemplate("task.ftl");
+
+					/* Create a data-model */
+					Map<String, Object> root = new HashMap<String, Object>();
+					root.put("taskname", request.queryParams("taskname"));
+
+					System.out.println(request.queryParams("taskname"));
+
+					Writer out = new StringWriter();
+					temp.process(root, out);
+					return out.toString();
+
+				} catch (IOException | TemplateException e) {
+					e.printStackTrace();
+				}
+
 				return "Hello World...";
 			}
 		});

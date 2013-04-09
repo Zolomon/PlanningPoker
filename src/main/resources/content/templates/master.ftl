@@ -13,6 +13,14 @@
 	    <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico">
 	</head>
 	
+	<style>
+	
+	body {
+		padding-top: 80px;
+	}
+		
+	</style>
+	
 	<body>
 	
 	<!-- header section -->

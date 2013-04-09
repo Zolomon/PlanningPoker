@@ -23,7 +23,7 @@ public class Main {
 
 	public static void main(String[] args) {
 
-		staticFileRoute("/public");
+		staticFileRoute("/content");
 		
 		get(new Route("/hello") {
 			@Override

@@ -1,0 +1,22 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.zolomon.planningpoker</groupId>
+  <artifactId>planning_poker</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>A game of Planning Poker</name>
+  <description>A software cost estimation technique</description>
+  <packaging>jar</packaging>
+  <dependencies>
+  	<dependency>
+  		<groupId>com.sparkjava</groupId>
+		<artifactId>spark-core</artifactId>
+		<version>0.9.9.6-SNAPSHOT</version>
+  	</dependency>
+  	<dependency>
+  		<groupId>org.freemarker</groupId>
+  		<artifactId>freemarker</artifactId>
+  		<!-- Latest 2.3.x (not 2.4.x), at least 2.3.19 -->
+  		<version>[2.3.19,2.4)</version>
+	</dependency>
+  </dependencies>
+</project>

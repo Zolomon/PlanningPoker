@@ -18,5 +18,10 @@
   		<!-- Latest 2.3.x (not 2.4.x), at least 2.3.19 -->
   		<version>[2.3.19,2.4)</version>
 	</dependency>
+	<dependency>
+    	<groupId>org.xerial</groupId>
+    	<artifactId>sqlite-jdbc</artifactId>
+    	<version>3.7.2</version>
+	</dependency>
   </dependencies>
 </project>

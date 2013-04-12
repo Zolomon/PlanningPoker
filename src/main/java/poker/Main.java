@@ -9,6 +9,10 @@ import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,8 +24,17 @@ import spark.*;
 import spark.utils.IOUtils;
 
 public class Main {
+	private static DatabaseManager dm;
+	
+	public static void main(String[] args) throws ClassNotFoundException {
 
-	public static void main(String[] args) {
+		// SQLite setup section
+		Class.forName("org.sqlite.JDBC");
+
+		 dm = new DatabaseManager();
+		
+		// End of SQLite setup section
+
 		final Configuration cfg = new Configuration();
 		try {
 

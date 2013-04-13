@@ -6,12 +6,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.sql.*;
 import java.util.List;
 
 import poker.entities.Estimate;
 import poker.entities.Story;
 import poker.entities.Task;
+import poker.entities.UnitType;
 import poker.entities.User;
 
 public class DatabaseManager implements IEntityManager {
@@ -48,16 +52,17 @@ public class DatabaseManager implements IEntityManager {
 
 		// this table will store the individual tasks
 		statement.execute("drop table if exists tasks");
-		statement.execute("create table tasks ( "
-				+ "id integer primary key autoincrement, "
-				// task's name
-				+ "name text, "
-				// task's description
-				+ "description text, "
-				// When it was created
-				+ "created_at datetime DEFAULT (datetime('now')), "
-				// When it was published
-				+ "published_at datetime " + ")");
+		statement
+				.execute("create table tasks ( "
+						+ "id integer primary key autoincrement, "
+						// task's name
+						+ "name text, "
+						// task's description
+						+ "description text, "
+						// When it was created
+						+ "created_at datetime DEFAULT (datetime('now', 'localtime')), "
+						// When it was published
+						+ "published_at datetime " + ")");
 
 		// This table will store the individual estimations created by each
 		// task
@@ -66,11 +71,12 @@ public class DatabaseManager implements IEntityManager {
 				+ "id integer primary key autoincrement, "
 				// task.id
 				+ "task_id integer, "
-				// the complexity symbol (can be special, like coffee mug) [what will be shown on the card]
+				// the complexity symbol (can be special, like coffee mug) [what
+				// will be shown on the card]
 				+ "complexity_symbol text, "
 				// the unit, we should create an enum for this that uses the
 				// same integer values
-				+ "unit integer, "
+				+ "unit integer DEFAULT 1, "
 				// the value of this complexity in its unit
 				+ "unit_value integer " + ")");
 
@@ -105,7 +111,7 @@ public class DatabaseManager implements IEntityManager {
 				+ "consensus integer DEFAULT -1,"
 				// current iteration, so we can figure out consensus and how
 				// long it took etc. etc.
-				+ "iteration integer DEFAULT 0" + ")");
+				+ "iteration integer DEFAULT 0)");
 
 		// This table will store the estimations for each user
 		statement.execute("drop table if exists story_user_estimations");
@@ -128,7 +134,7 @@ public class DatabaseManager implements IEntityManager {
 		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
 
 		PreparedStatement ps = connection
-				.prepareStatement("SELECT (id, name, description, datetime(created_at), datetime(published_at)) FROM tasks where id=? LIMIT 1");
+				.prepareStatement("SELECT id, name, description, datetime(created_at), datetime(published_at) FROM tasks where id=? LIMIT 1");
 		ps.setInt(1, id);
 
 		Task task = null;
@@ -136,9 +142,20 @@ public class DatabaseManager implements IEntityManager {
 		ResultSet res = ps.executeQuery();
 
 		while (res.next()) {
-			task = new Task(res.getInt("id"), res.getString("name"),
-					res.getString("description"), res.getDate("created_at"),
-					res.getDate("published_at"));
+			try {
+				task = new Task(res.getInt("id"), res.getString("name"),
+						res.getString("description"), new java.sql.Date(
+								dateFormat.parse(
+										res.getString("datetime(created_at)"))
+										.getTime()),
+						res.getDate("datetime(published_at)"));
+
+			} catch (ParseException e) {
+				System.err
+						.println("Error parsing tasks.created_at using task id: "
+								+ res.getInt("id"));
+				e.printStackTrace();
+			}
 		}
 
 		connection.close();
@@ -162,96 +179,289 @@ public class DatabaseManager implements IEntityManager {
 		connection.close();
 	}
 
-	@Override
-	public Story getStory(int id) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setStory(Story story) throws SQLException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public User getUser(int id) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setUser(User user) throws SQLException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public Estimate getEstimate(int id) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void setEstimate(Estimate estimate) throws SQLException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public List<Story> getStoriesFromTask(Task task) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<User> getUsersFromTask(Task task) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Estimate> getEstimatesFromStory(Story story)
-			throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Estimate> getEstimatesFromUser(User user) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void addUserToTask(Task task, User user) throws SQLException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void addStoryToTask(Task task, Story story) throws SQLException {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void addEstimateToStory(Story story, Estimate estimate)
-			throws SQLException {
-		// TODO Auto-generated method stub
-
-	}
-
 	public void insertTask(Task task) throws SQLException {
 		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
 		PreparedStatement ps = connection
 				.prepareStatement("INSERT into tasks (name, description) values (?,?)");
 		ps.setString(1, task.getName());
 		ps.setString(2, task.getDescription());
-		// ps.setNull(3, sqlType)
 
 		ps.executeUpdate();
 
 		connection.close();
+	}
+
+	@Override
+	public void deleteTask(int id) throws SQLException {
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+
+		PreparedStatement ps = connection
+				.prepareStatement("DELETE FROM tasks where id=?");
+		ps.setInt(1, id);
+
+		ps.executeUpdate();
+
+		connection.close();
+	}
+
+	@Override
+	public Story getStory(int id) throws SQLException {
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+
+		PreparedStatement ps = connection
+				.prepareStatement("SELECT id, task_id, name, description, consensus, iteration FROM stories where id=? LIMIT 1");
+		ps.setInt(1, id);
+
+		Story story = null;
+
+		ResultSet res = ps.executeQuery();
+
+		while (res.next()) {
+			story = new Story(res.getInt("id"), res.getInt("task_id"),
+					res.getString("name"), res.getString("description"),
+					res.getInt("consensus"), res.getInt("iteration"));
+		}
+
+		connection.close();
+
+		return story;
+	}
+
+	@Override
+	public void setStory(Story story) throws SQLException {
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+
+		PreparedStatement ps = connection
+				.prepareStatement("UPDATE stories SET name=?, description=?, consensus=?, iteration=? where id=?");
+		ps.setString(1, story.getName());
+		ps.setString(2, story.getDescription());
+		ps.setInt(3, story.getConsensus());
+		ps.setInt(4, story.getIteration());
+		ps.setInt(5, story.getId());
+
+		ps.executeUpdate();
+
+		connection.close();
+	}
+
+	@Override
+	public void insertStory(Story story) throws SQLException {
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+		PreparedStatement ps = connection
+				.prepareStatement("INSERT into stories (task_id, name, description) values (?,?,?)");
+		ps.setInt(1, story.getTaskId());
+		ps.setString(2, story.getName());
+		ps.setString(3, story.getDescription());
+
+		ps.executeUpdate();
+
+		connection.close();
+	}
+
+	@Override
+	public void deleteStory(int id) throws SQLException {
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+
+		PreparedStatement ps = connection
+				.prepareStatement("DELETE FROM stories where id=?");
+		ps.setInt(1, id);
+
+		ps.executeUpdate();
+
+		connection.close();
+	}
+
+	@Override
+	public User getUser(int id) throws SQLException {
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+
+		PreparedStatement ps = connection
+				.prepareStatement("SELECT id, name FROM users where id=? LIMIT 1");
+		ps.setInt(1, id);
+
+		User user = null;
+
+		ResultSet res = ps.executeQuery();
+
+		while (res.next()) {
+			user = new User(res.getInt("id"), res.getString("name"));
+		}
+
+		connection.close();
+
+		return user;
+	}
+
+	@Override
+	public void insertUser(User user) throws SQLException {
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+		PreparedStatement ps = connection
+				.prepareStatement("INSERT into users (name) values (?)");
+		ps.setString(1, user.getName());
+
+		ps.executeUpdate();
+
+		connection.close();
+	}
+
+	@Override
+	public void deleteUser(int id) throws SQLException {
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+
+		PreparedStatement ps = connection
+				.prepareStatement("DELETE FROM users where id=?");
+		ps.setInt(1, id);
+
+		ps.executeUpdate();
+
+		connection.close();
+	}
+
+	@Override
+	public void setUser(User user) throws SQLException {
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+
+		PreparedStatement ps = connection
+				.prepareStatement("UPDATE users SET name=? where id=?");
+		ps.setString(1, user.getName());
+		ps.setInt(2, user.getId());
+
+		ps.executeUpdate();
+
+		connection.close();
+
+	}
+
+	@Override
+	public Estimate getEstimate(int id) throws SQLException {
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+
+		PreparedStatement ps = connection
+				.prepareStatement("SELECT id, task_id, complexity_symbol, unit, unit_value FROM estimations where id=? LIMIT 1");
+		ps.setInt(1, id);
+
+		Estimate estimate = null;
+
+		ResultSet res = ps.executeQuery();
+
+		while (res.next()) {
+			estimate = new Estimate(res.getInt("id"), res.getInt("task_id"),
+					res.getString("complexity_symbol"),
+					UnitType.values()[res.getInt("unit")],
+					res.getInt("unit_value"));
+		}
+
+		connection.close();
+
+		return estimate;
+	}
+
+	@Override
+	public void setEstimate(Estimate estimate) throws SQLException {
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+
+		PreparedStatement ps = connection
+				.prepareStatement("UPDATE estimations SET complexity_symbol=?, unit=?, unit_value=? where id=?");
+		ps.setString(1, estimate.getComplexitySymbol());
+		ps.setInt(2, estimate.getUnit().getCode());
+		ps.setInt(3, estimate.getUnitValue());
+		ps.setInt(4, estimate.getId());
+
+		ps.executeUpdate();
+
+		connection.close();
+	}
+
+	@Override
+	public void insertEstimate(Estimate estimate) throws SQLException {
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+		PreparedStatement ps = connection
+				.prepareStatement("INSERT into estimations (task_id, complexity_symbol, unit, unit_value) values (?,?,?,?)");
+		ps.setInt(2, estimate.getTaskId());
+		ps.setString(1, estimate.getComplexitySymbol());
+		ps.setInt(2, estimate.getUnit().getCode());
+		ps.setInt(3, estimate.getUnitValue());
+
+		ps.executeUpdate();
+
+		connection.close();
+	}
+
+	@Override
+	public void deleteEstimate(int id) throws SQLException {
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+
+		PreparedStatement ps = connection
+				.prepareStatement("DELETE FROM estimations where id=?");
+		ps.setInt(1, id);
+
+		ps.executeUpdate();
+
+		connection.close();
+	}
+
+	@Override
+	public List<Story> getStoriesFromTask(int task_id) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<User> getUsersFromTask(int task_id) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Estimate> getEstimatesFromStory(int story_id)
+			throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Estimate> getEstimatesFromUser(int user_id) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void addUserToTask(int task_id, User user) throws SQLException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void addStoryToTask(int task_id, Story story) throws SQLException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void addEstimateToStory(int story_id, Estimate estimate)
+			throws SQLException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void deleteUserFromTask(int task_id, int user_id)
+			throws SQLException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void deleteStoryFromTask(int task_id, int story_id)
+			throws SQLException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void deleteEstimateFromStory(int story_id, int estimate_id)
+			throws SQLException {
+		// TODO Auto-generated method stub
+
 	}
 }

@@ -2,11 +2,21 @@ package poker;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.SimpleDateFormat;
+import java.util.List;
 
-public class DatabaseManager {
+import poker.entities.Estimate;
+import poker.entities.Story;
+import poker.entities.Task;
+import poker.entities.User;
+
+public class DatabaseManager implements IEntityManager {
 	Connection connection = null;
+	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	public DatabaseManager() {
 		init();
@@ -38,15 +48,16 @@ public class DatabaseManager {
 
 		// this table will store the individual tasks
 		statement.execute("drop table if exists tasks");
-		statement
-				.execute("create table tasks ( "
-						+ "id integer primary key autoincrement, "
-						// task's name
-						+ "name text, "
-						// When it was created
-						+ "created_at datetime DEFAULT (datetime('now', 'localtime')), "
-						// When it was published
-						+ "published_at datetime " + ")");
+		statement.execute("create table tasks ( "
+				+ "id integer primary key autoincrement, "
+				// task's name
+				+ "name text, "
+				// task's description
+				+ "description text, "
+				// When it was created
+				+ "created_at datetime DEFAULT (datetime('now')), "
+				// When it was published
+				+ "published_at datetime " + ")");
 
 		// This table will store the individual estimations created by each
 		// task
@@ -70,8 +81,7 @@ public class DatabaseManager {
 				// user's name
 				+ "name text, "
 				// when it was created
-				+ "created_at datetime DEFAULT (datetime('now', 'localtime')) "
-				+ ")");
+				+ "created_at datetime DEFAULT (strftime('%s', 'now')) " + ")");
 
 		// This table will store the team of users for each task
 		statement.execute("drop table if exists task_team");
@@ -113,5 +123,137 @@ public class DatabaseManager {
 				// insert (so we can keep track of during which iteration the
 				// estimate was made)
 				+ "story_iteration integer" + ")");
+	}
+
+	@Override
+	public Task getTask(int id) throws SQLException {
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+
+		PreparedStatement ps = connection
+				.prepareStatement("SELECT (id, name, description, datetime(created_at), datetime(published_at)) FROM tasks where id=? LIMIT 1");
+		ps.setInt(1, id);
+
+		Task task = null;
+
+		ResultSet res = ps.executeQuery();
+
+		while (res.next()) {
+			task = new Task(res.getInt("id"), res.getString("name"),
+					res.getString("description"), res.getDate("created_at"),
+					res.getDate("published_at"));
+		}
+
+		connection.close();
+
+		return task;
+	}
+
+	@Override
+	public void setTask(Task task) throws SQLException {
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+
+		PreparedStatement ps = connection
+				.prepareStatement("UPDATE tasks set name=?, created_at=?, published_at=? where id=?");
+		ps.setString(1, task.getName());
+		ps.setDate(2, task.getCreatedAt());
+		ps.setDate(3, task.getPublishedAt());
+		ps.setInt(4, task.getId());
+
+		ps.executeUpdate();
+
+		connection.close();
+	}
+
+	@Override
+	public Story getStory(int id) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setStory(Story story) throws SQLException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public User getUser(int id) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setUser(User user) throws SQLException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public Estimate getEstimate(int id) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void setEstimate(Estimate estimate) throws SQLException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public List<Story> getStoriesFromTask(Task task) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<User> getUsersFromTask(Task task) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Estimate> getEstimatesFromStory(Story story)
+			throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Estimate> getEstimatesFromUser(User user) throws SQLException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void addUserToTask(Task task, User user) throws SQLException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void addStoryToTask(Task task, Story story) throws SQLException {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void addEstimateToStory(Story story, Estimate estimate)
+			throws SQLException {
+		// TODO Auto-generated method stub
+
+	}
+
+	public void insertTask(Task task) throws SQLException {
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+		PreparedStatement ps = connection
+				.prepareStatement("INSERT into tasks (name, description) values (?,?)");
+		ps.setString(1, task.getName());
+		ps.setString(2, task.getDescription());
+		// ps.setNull(3, sqlType)
+
+		ps.executeUpdate();
+
+		connection.close();
 	}
 }

@@ -10,11 +10,14 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URISyntaxException;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
+
+import poker.entities.Task;
 
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
@@ -25,14 +28,26 @@ import spark.utils.IOUtils;
 
 public class Main {
 	private static DatabaseManager dm;
-	
+
 	public static void main(String[] args) throws ClassNotFoundException {
 
 		// SQLite setup section
 		Class.forName("org.sqlite.JDBC");
 
-		 dm = new DatabaseManager();
-		
+		dm = new DatabaseManager();
+
+		try {
+			Task t = new Task("Planning poker", "Implement planning poker");
+			Task t2 = new Task("Planning poker", "Implement planning poker");
+			dm.insertTask(t);
+			dm.insertTask(t2);
+			System.out.println(dm.getTask(1).toString());
+			System.out.println(dm.getTask(2).toString());
+			
+		} catch (SQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		// End of SQLite setup section
 
 		final Configuration cfg = new Configuration();

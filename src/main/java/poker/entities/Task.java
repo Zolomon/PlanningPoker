@@ -1,17 +1,19 @@
 package poker.entities;
 
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 public class Task {
-	private int id;
-	private String name;
-	private String description;
-	private Date created_at;
-	private Date published_at;
+	private int		id;
+	private String	name;
+	private String	description;
+	private Date	created_at;
+	private Date	published_at;
 
 	/***
 	 * Constructor for new Task
+	 * 
 	 * @param name
 	 * @param description
 	 */
@@ -22,14 +24,14 @@ public class Task {
 
 	/***
 	 * Constructor to use when fetched from SQLite
+	 * 
 	 * @param id
 	 * @param name
 	 * @param description
 	 * @param created_at
 	 * @param published_at
 	 */
-	public Task(int id, String name, String description, Date created_at,
-			Date published_at) {
+	public Task(int id, String name, String description, Date created_at, Date published_at) {
 		this.setId(id);
 		this.setName(name);
 		this.setDescription(description);
@@ -80,14 +82,10 @@ public class Task {
 	@Override
 	public String toString() {
 
-		return "["
-				+ getId()
-				+ ","
-				+ getName()
-				+ ", "
-				+ (getDescription().length() > 10 ? getDescription().substring(
-						0, 9) : getDescription()) + ", "
-				+ (getCreatedAt() != null ? getCreatedAt().toString() : "null") + ", " + (getPublishedAt() != null ? getPublishedAt().toString() : "null") + "]";
+		return "[" + getId() + "," + getName() + ", "
+				+ (getDescription().length() > 10 ? getDescription().substring(0, 9) : getDescription()) + ", "
+				+ (getCreatedAt() != null ? new SimpleDateFormat("yyyy-MM-dd").format(getCreatedAt()) : "null") + ", "
+				+ (getPublishedAt() != null ? new SimpleDateFormat("yyyy-MM-dd").format(getPublishedAt()) : "null")
+				+ "]";
 	}
-
 }

@@ -1,30 +1,25 @@
 package poker;
 
-import static spark.Spark.*;
+import static spark.Spark.get;
+import static spark.Spark.post;
+import static spark.Spark.staticFileRoute;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.net.URISyntaxException;
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 
 import poker.entities.Task;
-
+import spark.Request;
+import spark.Response;
+import spark.Route;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
-import spark.*;
-import spark.utils.IOUtils;
 
 public class Main {
 	private static DatabaseManager dm;
@@ -34,15 +29,17 @@ public class Main {
 		// SQLite setup section
 		Class.forName("org.sqlite.JDBC");
 
-		dm = new DatabaseManager();
+		dm = new DatabaseManager(System.out);
 
 		try {
 			Task t = new Task("Planning poker", "Implement planning poker");
+			t.setPublishedAt(new java.sql.Date(new java.util.Date().getTime()));
 			Task t2 = new Task("Planning poker", "Implement planning poker");
+			t2.setPublishedAt(new java.sql.Date(new java.util.Date().getTime()));
 			dm.insertTask(t);
 			dm.insertTask(t2);
-			System.out.println(dm.getTask(1).toString());
-			System.out.println(dm.getTask(2).toString());
+			dm.getTask(1);
+			dm.getTask(2);
 			
 		} catch (SQLException e1) {
 			e1.printStackTrace();

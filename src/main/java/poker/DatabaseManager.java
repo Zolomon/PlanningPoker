@@ -1,5 +1,8 @@
 package poker;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -8,9 +11,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.sql.*;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import poker.entities.Estimate;
 import poker.entities.Story;
@@ -19,11 +23,28 @@ import poker.entities.UnitType;
 import poker.entities.User;
 
 public class DatabaseManager implements IEntityManager {
-	Connection connection = null;
-	SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	Connection				connection	= null;
+	SimpleDateFormat		dateFormat	= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private OutputStream	debug;
 
-	public DatabaseManager() {
+	private void debug(String msg) {
+		if (debug == null) {
+			System.out.println(msg);
+			return;
+		}
+
+		try {
+			debug.write(msg.getBytes(Charset.forName("UTF-8")));
+			debug.write('\n');
+			debug.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public DatabaseManager(OutputStream stream) {
 		init();
+		this.debug = stream;
 	}
 
 	public void init() {
@@ -52,24 +73,21 @@ public class DatabaseManager implements IEntityManager {
 
 		// this table will store the individual tasks
 		statement.execute("drop table if exists tasks");
-		statement
-				.execute("create table tasks ( "
-						+ "id integer primary key autoincrement, "
-						// task's name
-						+ "name text, "
-						// task's description
-						+ "description text, "
-						// When it was created
-						+ "created_at datetime DEFAULT (datetime('now', 'localtime')), "
-						// When it was published
-						+ "published_at datetime " + ")");
+		statement.execute("create table tasks ( " + "id integer primary key autoincrement, "
+		// task's name
+				+ "name text, "
+				// task's description
+				+ "description text, "
+				// When it was created
+				+ "created_at datetime DEFAULT (datetime('now', 'localtime')), "
+				// When it was published
+				+ "published_at datetime " + ")");
 
 		// This table will store the individual estimations created by each
 		// task
 		statement.execute("drop table if exists estimations");
-		statement.execute("create table estimations ("
-				+ "id integer primary key autoincrement, "
-				// task.id
+		statement.execute("create table estimations (" + "id integer primary key autoincrement, "
+		// task.id
 				+ "task_id integer, "
 				// the complexity symbol (can be special, like coffee mug) [what
 				// will be shown on the card]
@@ -82,25 +100,22 @@ public class DatabaseManager implements IEntityManager {
 
 		// This table will store the individual users
 		statement.execute("drop table if exists users");
-		statement.execute("create table users ( "
-				+ "id integer primary key autoincrement, "
-				// user's name
+		statement.execute("create table users ( " + "id integer primary key autoincrement, "
+		// user's name
 				+ "name text)");
 
 		// This table will store the team of users for each task
 		statement.execute("drop table if exists task_team");
-		statement.execute("create table task_team ( "
-				+ "id integer primary key autoincrement, "
-				// users.id
+		statement.execute("create table task_team ( " + "id integer primary key autoincrement, "
+		// users.id
 				+ "user_id integer, "
 				// task.id
 				+ "task_id integer " + ")");
 
 		// This table will store the individual stories
 		statement.execute("drop table if exists stories");
-		statement.execute("create table stories ( "
-				+ "id integer primary key autoincrement, "
-				// tasks.id
+		statement.execute("create table stories ( " + "id integer primary key autoincrement, "
+		// tasks.id
 				+ "task_id integer, "
 				// story's name
 				+ "name text, "
@@ -115,9 +130,8 @@ public class DatabaseManager implements IEntityManager {
 
 		// This table will store the estimations for each user
 		statement.execute("drop table if exists story_user_estimations");
-		statement.execute("create table story_user_estimations ( "
-				+ "id integer primary key autoincrement, "
-				// story.id
+		statement.execute("create table story_user_estimations ( " + "id integer primary key autoincrement, "
+		// story.id
 				+ "story_id integer, "
 				// users.id
 				+ "user_id integer, "
@@ -143,17 +157,13 @@ public class DatabaseManager implements IEntityManager {
 
 		while (res.next()) {
 			try {
-				task = new Task(res.getInt("id"), res.getString("name"),
-						res.getString("description"), new java.sql.Date(
-								dateFormat.parse(
-										res.getString("datetime(created_at)"))
-										.getTime()),
-						res.getDate("datetime(published_at)"));
-
+				task = new Task(res.getInt("id"), res.getString("name"), res.getString("description"),
+						new java.sql.Date(dateFormat.parse(res.getString("datetime(created_at)")).getTime()),
+						(res.getString("datetime(published_at)")) == null ? null : new java.sql.Date(dateFormat.parse(
+								res.getString("datetime(published_at)")).getTime()));
+				debug("Fetching task: " + task.toString());
 			} catch (ParseException e) {
-				System.err
-						.println("Error parsing tasks.created_at using task id: "
-								+ res.getInt("id"));
+				System.err.println("Error parsing tasks.created_at using task id: " + res.getInt("id"));
 				e.printStackTrace();
 			}
 		}
@@ -174,6 +184,8 @@ public class DatabaseManager implements IEntityManager {
 		ps.setDate(3, task.getPublishedAt());
 		ps.setInt(4, task.getId());
 
+		debug("Setting task: " + task.toString());
+
 		ps.executeUpdate();
 
 		connection.close();
@@ -181,10 +193,11 @@ public class DatabaseManager implements IEntityManager {
 
 	public void insertTask(Task task) throws SQLException {
 		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
-		PreparedStatement ps = connection
-				.prepareStatement("INSERT into tasks (name, description) values (?,?)");
+		PreparedStatement ps = connection.prepareStatement("INSERT into tasks (name, description) values (?,?)");
 		ps.setString(1, task.getName());
 		ps.setString(2, task.getDescription());
+
+		debug("Inserting task: " + task.toString());
 
 		ps.executeUpdate();
 
@@ -195,9 +208,10 @@ public class DatabaseManager implements IEntityManager {
 	public void deleteTask(int id) throws SQLException {
 		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
 
-		PreparedStatement ps = connection
-				.prepareStatement("DELETE FROM tasks where id=?");
+		PreparedStatement ps = connection.prepareStatement("DELETE FROM tasks where id=?");
 		ps.setInt(1, id);
+
+		debug("Deleting task id: " + id);
 
 		ps.executeUpdate();
 
@@ -217,9 +231,10 @@ public class DatabaseManager implements IEntityManager {
 		ResultSet res = ps.executeQuery();
 
 		while (res.next()) {
-			story = new Story(res.getInt("id"), res.getInt("task_id"),
-					res.getString("name"), res.getString("description"),
-					res.getInt("consensus"), res.getInt("iteration"));
+			story = new Story(res.getInt("id"), res.getInt("task_id"), res.getString("name"),
+					res.getString("description"), res.getInt("consensus"), res.getInt("iteration"));
+
+			debug("Fetching story: " + story.toString());
 		}
 
 		connection.close();
@@ -239,6 +254,8 @@ public class DatabaseManager implements IEntityManager {
 		ps.setInt(4, story.getIteration());
 		ps.setInt(5, story.getId());
 
+		debug("Setting story: " + story.toString());
+
 		ps.executeUpdate();
 
 		connection.close();
@@ -253,6 +270,8 @@ public class DatabaseManager implements IEntityManager {
 		ps.setString(2, story.getName());
 		ps.setString(3, story.getDescription());
 
+		debug("Insering story: " + story.toString());
+
 		ps.executeUpdate();
 
 		connection.close();
@@ -262,9 +281,10 @@ public class DatabaseManager implements IEntityManager {
 	public void deleteStory(int id) throws SQLException {
 		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
 
-		PreparedStatement ps = connection
-				.prepareStatement("DELETE FROM stories where id=?");
+		PreparedStatement ps = connection.prepareStatement("DELETE FROM stories where id=?");
 		ps.setInt(1, id);
+
+		debug("Deleting story with id: " + id);
 
 		ps.executeUpdate();
 
@@ -275,8 +295,7 @@ public class DatabaseManager implements IEntityManager {
 	public User getUser(int id) throws SQLException {
 		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
 
-		PreparedStatement ps = connection
-				.prepareStatement("SELECT id, name FROM users where id=? LIMIT 1");
+		PreparedStatement ps = connection.prepareStatement("SELECT id, name FROM users where id=? LIMIT 1");
 		ps.setInt(1, id);
 
 		User user = null;
@@ -285,6 +304,7 @@ public class DatabaseManager implements IEntityManager {
 
 		while (res.next()) {
 			user = new User(res.getInt("id"), res.getString("name"));
+			debug("Fetching user: " + user.toString());
 		}
 
 		connection.close();
@@ -295,9 +315,10 @@ public class DatabaseManager implements IEntityManager {
 	@Override
 	public void insertUser(User user) throws SQLException {
 		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
-		PreparedStatement ps = connection
-				.prepareStatement("INSERT into users (name) values (?)");
+		PreparedStatement ps = connection.prepareStatement("INSERT into users (name) values (?)");
 		ps.setString(1, user.getName());
+
+		debug("Inserting user: " + user.toString());
 
 		ps.executeUpdate();
 
@@ -308,9 +329,10 @@ public class DatabaseManager implements IEntityManager {
 	public void deleteUser(int id) throws SQLException {
 		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
 
-		PreparedStatement ps = connection
-				.prepareStatement("DELETE FROM users where id=?");
+		PreparedStatement ps = connection.prepareStatement("DELETE FROM users where id=?");
 		ps.setInt(1, id);
+
+		debug("Deleting user with id: " + id);
 
 		ps.executeUpdate();
 
@@ -321,10 +343,11 @@ public class DatabaseManager implements IEntityManager {
 	public void setUser(User user) throws SQLException {
 		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
 
-		PreparedStatement ps = connection
-				.prepareStatement("UPDATE users SET name=? where id=?");
+		PreparedStatement ps = connection.prepareStatement("UPDATE users SET name=? where id=?");
 		ps.setString(1, user.getName());
 		ps.setInt(2, user.getId());
+
+		debug("Setting user: " + user.toString());
 
 		ps.executeUpdate();
 
@@ -345,10 +368,9 @@ public class DatabaseManager implements IEntityManager {
 		ResultSet res = ps.executeQuery();
 
 		while (res.next()) {
-			estimate = new Estimate(res.getInt("id"), res.getInt("task_id"),
-					res.getString("complexity_symbol"),
-					UnitType.values()[res.getInt("unit")],
-					res.getInt("unit_value"));
+			estimate = new Estimate(res.getInt("id"), res.getInt("task_id"), res.getString("complexity_symbol"),
+					UnitType.values()[res.getInt("unit")], res.getInt("unit_value"));
+			debug("Fetching estimate: " + estimate.toString());
 		}
 
 		connection.close();
@@ -367,6 +389,8 @@ public class DatabaseManager implements IEntityManager {
 		ps.setInt(3, estimate.getUnitValue());
 		ps.setInt(4, estimate.getId());
 
+		debug("Setting estimate: " + estimate.toString());
+
 		ps.executeUpdate();
 
 		connection.close();
@@ -382,6 +406,8 @@ public class DatabaseManager implements IEntityManager {
 		ps.setInt(2, estimate.getUnit().getCode());
 		ps.setInt(3, estimate.getUnitValue());
 
+		debug("Inserting estimate: " + estimate.toString());
+
 		ps.executeUpdate();
 
 		connection.close();
@@ -391,10 +417,10 @@ public class DatabaseManager implements IEntityManager {
 	public void deleteEstimate(int id) throws SQLException {
 		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
 
-		PreparedStatement ps = connection
-				.prepareStatement("DELETE FROM estimations where id=?");
+		PreparedStatement ps = connection.prepareStatement("DELETE FROM estimations where id=?");
 		ps.setInt(1, id);
 
+		debug("Deleting estimate with id: " + id);
 		ps.executeUpdate();
 
 		connection.close();
@@ -413,8 +439,7 @@ public class DatabaseManager implements IEntityManager {
 	}
 
 	@Override
-	public List<Estimate> getEstimatesFromStory(int story_id)
-			throws SQLException {
+	public List<Estimate> getEstimatesFromStory(int story_id) throws SQLException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -438,29 +463,25 @@ public class DatabaseManager implements IEntityManager {
 	}
 
 	@Override
-	public void addEstimateToStory(int story_id, Estimate estimate)
-			throws SQLException {
+	public void addEstimateToStory(int story_id, Estimate estimate) throws SQLException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void deleteUserFromTask(int task_id, int user_id)
-			throws SQLException {
+	public void deleteUserFromTask(int task_id, int user_id) throws SQLException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void deleteStoryFromTask(int task_id, int story_id)
-			throws SQLException {
+	public void deleteStoryFromTask(int task_id, int story_id) throws SQLException {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public void deleteEstimateFromStory(int story_id, int estimate_id)
-			throws SQLException {
+	public void deleteEstimateFromStory(int story_id, int estimate_id) throws SQLException {
 		// TODO Auto-generated method stub
 
 	}

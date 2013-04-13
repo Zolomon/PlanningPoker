@@ -1,15 +1,16 @@
 package poker.entities;
 
 public class Story {
-	private int id;
-	private int task_id;
-	private String name;
-	private String description;
-	private int consensus;
-	private int iteration;
+	private int		id;
+	private int		task_id;
+	private String	name;
+	private String	description;
+	private int		consensus;
+	private int		iteration;
 
 	/***
 	 * Constructor for new Story
+	 * 
 	 * @param task_id
 	 * @param name
 	 * @param description
@@ -19,9 +20,10 @@ public class Story {
 		this.setName(name);
 		this.setDescription(description);
 	}
-	
+
 	/***
 	 * Constructor to use when fetching from SQLite
+	 * 
 	 * @param id
 	 * @param task_id
 	 * @param name
@@ -85,5 +87,12 @@ public class Story {
 
 	public void setIteration(int iteration) {
 		this.iteration = iteration;
+	}
+
+	@Override
+	public String toString() {
+		return "[" + getId() + ", " + getTaskId() + ", " + getName() + ", "
+				+ getDescription() + ", " + getConsensus() + ", "
+				+ getIteration() + "]";
 	}
 }

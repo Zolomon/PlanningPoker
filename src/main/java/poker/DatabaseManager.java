@@ -66,8 +66,8 @@ public class DatabaseManager implements IEntityManager {
 				+ "id integer primary key autoincrement, "
 				// task.id
 				+ "task_id integer, "
-				// the complexity value [what will be shown on the card]
-				+ "complexity integer, "
+				// the complexity symbol (can be special, like coffee mug) [what will be shown on the card]
+				+ "complexity_symbol text, "
 				// the unit, we should create an enum for this that uses the
 				// same integer values
 				+ "unit integer, "
@@ -79,9 +79,7 @@ public class DatabaseManager implements IEntityManager {
 		statement.execute("create table users ( "
 				+ "id integer primary key autoincrement, "
 				// user's name
-				+ "name text, "
-				// when it was created
-				+ "created_at datetime DEFAULT (strftime('%s', 'now')) " + ")");
+				+ "name text)");
 
 		// This table will store the team of users for each task
 		statement.execute("drop table if exists task_team");

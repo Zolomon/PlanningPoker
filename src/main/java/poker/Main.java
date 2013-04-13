@@ -45,7 +45,6 @@ public class Main {
 			System.out.println(dm.getTask(2).toString());
 			
 		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		// End of SQLite setup section

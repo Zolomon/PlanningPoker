@@ -1,6 +1,7 @@
 package poker.entities;
 
 import java.sql.Date;
+import java.util.List;
 
 public class Task {
 	private int id;
@@ -9,11 +10,24 @@ public class Task {
 	private Date created_at;
 	private Date published_at;
 
+	/***
+	 * Constructor for new Task
+	 * @param name
+	 * @param description
+	 */
 	public Task(String name, String description) {
 		this.setName(name);
 		this.setDescription(description);
 	}
 
+	/***
+	 * Constructor to use when fetched from SQLite
+	 * @param id
+	 * @param name
+	 * @param description
+	 * @param created_at
+	 * @param published_at
+	 */
 	public Task(int id, String name, String description, Date created_at,
 			Date published_at) {
 		this.setId(id);

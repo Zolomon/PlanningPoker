@@ -58,7 +58,6 @@ public class Main {
 
 					/* Create a data-model */
 					Map<String, Object> root = new HashMap<String, Object>();
-					root.put("user", "Big Joe");
 					root.put("tasks", dm.getTasks());
 
 					/* Merge data-model with template */
@@ -73,6 +72,41 @@ public class Main {
 
 				return "Hello World...";
 			}
+		});
+		
+		get(new Route("/tasks/edit/info/:id") {
+
+			@Override
+			public Object handle(Request request, Response response) {
+				  return "Hello: " + request.params(":id");
+			}
+			
+		});
+		
+		get(new Route("/new") {
+
+			@Override
+			public Object handle(Request request, Response response) {
+				try {
+
+					/* Get or create a template */
+					Template temp = cfg.getTemplate("newtask.ftl");
+
+					/* Create a data-model */
+					Map<String, Object> root = new HashMap<String, Object>();
+
+					/* Merge data-model with template */
+
+					Writer out = new StringWriter();
+					temp.process(root, out);
+					return out.toString();
+
+				} catch (IOException | TemplateException e) {
+					e.printStackTrace();
+				}
+				return "new task";
+			}
+			
 		});
 
 		get(new Route("/hello") {

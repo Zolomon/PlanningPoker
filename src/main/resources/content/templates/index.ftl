@@ -15,9 +15,11 @@
 			</tr>
 			</#list>
 		</table>
-		<p>
-			<button class="btn btn-large btn-primary" type="button">New task</button>
-		</p>
+			<form class="navbar-form pull-left" method="get" action="/new">
+				<p>
+					<button class="btn btn-large btn-primary" type="submit">New task</button>
+				</p>
+			</form>
 	</div>
 </div>
 

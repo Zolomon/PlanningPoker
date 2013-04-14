@@ -22,7 +22,30 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 public class Main {
-	private static DatabaseManager dm;
+	private static DatabaseManager	dm;
+
+	private void debug(String msg) {
+		System.out.println(msg);
+	}
+
+	private static String render(String filename, Configuration cfg, Map<String, Object> root) {
+		try {
+
+			/* Get or create a template */
+			Template temp = cfg.getTemplate(filename);
+
+			/* Merge data-model with template */
+
+			Writer out = new StringWriter();
+			temp.process(root, out);
+			return out.toString();
+
+		} catch (IOException | TemplateException e) {
+			e.printStackTrace();
+		}
+
+		return "Hello World...";
+	}
 
 	public static void main(String[] args) throws ClassNotFoundException {
 
@@ -31,12 +54,11 @@ public class Main {
 
 		dm = new DatabaseManager(System.out);
 
-
 		final Configuration cfg = new Configuration();
 		try {
 
-			File file = new File(Thread.currentThread().getContextClassLoader()
-					.getResource("content/templates/").toURI());
+			File file = new File(Thread.currentThread().getContextClassLoader().getResource("content/templates/")
+					.toURI());
 
 			cfg.setDirectoryForTemplateLoading(file);
 			cfg.setObjectWrapper(new DefaultObjectWrapper());
@@ -46,63 +68,16 @@ public class Main {
 		}
 
 		staticFileLocation("/content");
-		
+
 		get(new Route("/index") {
 			@Override
 			public Object handle(Request request, Response response) {
 
-				try {
+				/* Create a data-model */
+				Map<String, Object> root = new HashMap<String, Object>();
+				root.put("tasks", dm.getTasks());
 
-					/* Get or create a template */
-					Template temp = cfg.getTemplate("index.ftl");
-
-					/* Create a data-model */
-					Map<String, Object> root = new HashMap<String, Object>();
-					root.put("user", "Big Joe");
-					root.put("tasks", dm.getTasks());
-
-					/* Merge data-model with template */
-
-					Writer out = new StringWriter();
-					temp.process(root, out);
-					return out.toString();
-
-				} catch (IOException | TemplateException | SQLException e) {
-					e.printStackTrace();
-				}
-
-				return "Hello World...";
-			}
-		});
-
-		get(new Route("/hello") {
-			@Override
-			public Object handle(Request request, Response response) {
-
-				try {
-
-					/* Get or create a template */
-					Template temp = cfg.getTemplate("test.ftl");
-
-					/* Create a data-model */
-					Map<String, Object> root = new HashMap<String, Object>();
-					root.put("user", "Big Joe");
-					Map<String, Object> latest = new HashMap<String, Object>();
-					root.put("latestProduct", latest);
-					latest.put("url", "products/greenmouse.html");
-					latest.put("name", "green mouse");
-
-					/* Merge data-model with template */
-
-					Writer out = new StringWriter();
-					temp.process(root, out);
-					return out.toString();
-
-				} catch (IOException | TemplateException e) {
-					e.printStackTrace();
-				}
-
-				return "Hello World...";
+				return render("index.ftl", cfg, root);
 			}
 		});
 
@@ -110,25 +85,21 @@ public class Main {
 			@Override
 			public Object handle(Request request, Response response) {
 
-				try {
-					/* Get or create a template */
-					Template temp = cfg.getTemplate("task.ftl");
+				Map<String, Object> root = new HashMap<String, Object>();
+				root.put("taskname", request.queryParams("taskname"));
 
-					/* Create a data-model */
-					Map<String, Object> root = new HashMap<String, Object>();
-					root.put("taskname", request.queryParams("taskname"));
+				return render("task.ftl", cfg, root);
+			}
+		});
 
-					System.out.println(request.queryParams("taskname"));
+		get(new Route("/summary/:id") {
+			@Override
+			public Object handle(Request request, Response response) {
 
-					Writer out = new StringWriter();
-					temp.process(root, out);
-					return out.toString();
-
-				} catch (IOException | TemplateException e) {
-					e.printStackTrace();
-				}
-
-				return "Hello World...";
+				Map<String, Object> root = new HashMap<String, Object>();
+				root.put("id", request.params(":id"));
+				
+				return render("summary.ftl", cfg, root);
 			}
 		});
 

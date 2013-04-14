@@ -193,524 +193,636 @@ public class DatabaseManager implements IEntityManager {
 	}
 
 	@Override
-	public Task getTask(int id) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-
-		PreparedStatement ps = connection
-				.prepareStatement("SELECT id, name, description, datetime(created_at), datetime(published_at) FROM tasks where id=? LIMIT 1");
-		ps.setInt(1, id);
-
+	public Task getTask(int id) {
 		Task task = null;
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-		ResultSet res = ps.executeQuery();
+			PreparedStatement ps = connection
+					.prepareStatement("SELECT id, name, description, datetime(created_at), datetime(published_at) FROM tasks where id=? LIMIT 1");
+			ps.setInt(1, id);
 
-		while (res.next()) {
-			try {
-				task = new Task(res.getInt("id"), res.getString("name"), res.getString("description"),
-						new java.sql.Date(dateFormat.parse(res.getString("datetime(created_at)")).getTime()),
-						(res.getString("datetime(published_at)")) == null ? null : new java.sql.Date(dateFormat.parse(
-								res.getString("datetime(published_at)")).getTime()));
-				debug("Fetching task: " + task.toString());
-			} catch (ParseException e) {
-				System.err.println("Error parsing tasks.created_at using task id: " + res.getInt("id"));
-				e.printStackTrace();
+			ResultSet res = ps.executeQuery();
+
+			while (res.next()) {
+				try {
+					task = new Task(res.getInt("id"), res.getString("name"), res.getString("description"),
+							new java.sql.Date(dateFormat.parse(res.getString("datetime(created_at)")).getTime()),
+							(res.getString("datetime(published_at)")) == null ? null : new java.sql.Date(dateFormat
+									.parse(res.getString("datetime(published_at)")).getTime()));
+					debug("Fetching task: " + task.toString());
+				} catch (ParseException e) {
+					System.err.println("Error parsing tasks.created_at using task id: " + res.getInt("id"));
+					e.printStackTrace();
+				}
 			}
-		}
 
-		connection.close();
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 
 		return task;
 	}
 
 	@Override
-	public void setTask(Task task) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+	public void setTask(Task task) {
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-		PreparedStatement ps = connection
-				.prepareStatement("UPDATE tasks set name=?, created_at=?, published_at=? where id=?");
-		ps.setString(1, task.getName());
-		ps.setDate(2, task.getCreatedAt());
-		ps.setDate(3, task.getPublishedAt());
-		ps.setInt(4, task.getId());
+			PreparedStatement ps = connection
+					.prepareStatement("UPDATE tasks set name=?, created_at=?, published_at=? where id=?");
+			ps.setString(1, task.getName());
+			ps.setDate(2, task.getCreatedAt());
+			ps.setDate(3, task.getPublishedAt());
+			ps.setInt(4, task.getId());
 
-		debug("Setting task: " + task.toString());
+			debug("Setting task: " + task.toString());
 
-		ps.executeUpdate();
+			ps.executeUpdate();
 
-		connection.close();
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+
 	}
 
-	public void insertTask(Task task) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-		PreparedStatement ps = connection.prepareStatement("INSERT into tasks (name, description) values (?,?)");
-		ps.setString(1, task.getName());
-		ps.setString(2, task.getDescription());
+	public void insertTask(Task task) {
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			PreparedStatement ps = connection.prepareStatement("INSERT into tasks (name, description) values (?,?)");
+			ps.setString(1, task.getName());
+			ps.setString(2, task.getDescription());
 
-		debug("Inserting task: " + task.toString());
+			debug("Inserting task: " + task.toString());
 
-		ps.executeUpdate();
+			ps.executeUpdate();
 
-		connection.close();
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+
 	}
 
 	@Override
-	public void deleteTask(int id) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+	public void deleteTask(int id) {
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-		// Clean stories
-		List<Story> stories = getStoriesFromTask(id);		
-		for(Story story : stories) {
-			deleteStory(story.getId());
+			// Clean stories
+			List<Story> stories = getStoriesFromTask(id);
+			for (Story story : stories) {
+				deleteStory(story.getId());
+			}
+
+			// Clean users
+			List<User> users = getUsersFromTask(id);
+			for (User user : users) {
+				deleteUserFromTask(id, user.getId());
+			}
+
+			PreparedStatement ps = connection.prepareStatement("DELETE FROM tasks where id=?");
+			ps.setInt(1, id);
+
+			debug("Deleting task id: " + id);
+
+			ps.executeUpdate();
+
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
-		
-		// Clean users
-		List<User> users = getUsersFromTask(id);
-		for(User user : users) {
-			deleteUserFromTask(id, user.getId());
-		}
-		
-		PreparedStatement ps = connection.prepareStatement("DELETE FROM tasks where id=?");
-		ps.setInt(1, id);	
-		
-		debug("Deleting task id: " + id);
 
-		ps.executeUpdate();
-
-		connection.close();
 	}
 
 	@Override
-	public Story getStory(int id) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-
-		PreparedStatement ps = connection
-				.prepareStatement("SELECT id, task_id, name, description, consensus, iteration FROM stories where id=? LIMIT 1");
-		ps.setInt(1, id);
-
+	public Story getStory(int id) {
 		Story story = null;
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-		ResultSet res = ps.executeQuery();
+			PreparedStatement ps = connection
+					.prepareStatement("SELECT id, task_id, name, description, consensus, iteration FROM stories where id=? LIMIT 1");
+			ps.setInt(1, id);
 
-		while (res.next()) {
-			story = new Story(res.getInt("id"), res.getInt("task_id"), res.getString("name"),
-					res.getString("description"), res.getInt("consensus"), res.getInt("iteration"));
+			ResultSet res = ps.executeQuery();
 
-			debug("Fetching story: " + story.toString());
+			while (res.next()) {
+				story = new Story(res.getInt("id"), res.getInt("task_id"), res.getString("name"),
+						res.getString("description"), res.getInt("consensus"), res.getInt("iteration"));
+
+				debug("Fetching story: " + story.toString());
+			}
+
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
-
-		connection.close();
 
 		return story;
 	}
 
 	@Override
-	public void setStory(Story story) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+	public void setStory(Story story) {
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-		PreparedStatement ps = connection
-				.prepareStatement("UPDATE stories SET name=?, description=?, consensus=?, iteration=? where id=?");
-		ps.setString(1, story.getName());
-		ps.setString(2, story.getDescription());
-		ps.setInt(3, story.getConsensus());
-		ps.setInt(4, story.getIteration());
-		ps.setInt(5, story.getId());
+			PreparedStatement ps = connection
+					.prepareStatement("UPDATE stories SET name=?, description=?, consensus=?, iteration=? where id=?");
+			ps.setString(1, story.getName());
+			ps.setString(2, story.getDescription());
+			ps.setInt(3, story.getConsensus());
+			ps.setInt(4, story.getIteration());
+			ps.setInt(5, story.getId());
 
-		debug("Setting story: " + story.toString());
+			debug("Setting story: " + story.toString());
 
-		ps.executeUpdate();
+			ps.executeUpdate();
 
-		connection.close();
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+
 	}
 
 	@Override
-	public void insertStory(Story story) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-		PreparedStatement ps = connection
-				.prepareStatement("INSERT into stories (task_id, name, description) values (?,?,?)");
-		ps.setInt(1, story.getTaskId());
-		ps.setString(2, story.getName());
-		ps.setString(3, story.getDescription());
+	public void insertStory(Story story) {
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			PreparedStatement ps = connection
+					.prepareStatement("INSERT into stories (task_id, name, description) values (?,?,?)");
+			ps.setInt(1, story.getTaskId());
+			ps.setString(2, story.getName());
+			ps.setString(3, story.getDescription());
 
-		debug("Insering story: " + story.toString());
+			debug("Insering story: " + story.toString());
 
-		ps.executeUpdate();
+			ps.executeUpdate();
 
-		connection.close();
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+
 	}
 
 	@Override
-	public void deleteStory(int id) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+	public void deleteStory(int id) {
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-		HashMap<User,List<Estimate>> storyEstimates = getEstimatesFromStory(id);
-		
-		// Delete all story estimates
-		for (List<Estimate> estimates : storyEstimates.values())
-		{
-			for (Estimate estimate : estimates) {
-				deleteEstimateFromStory(id, estimate.getId());
+			HashMap<User, List<Estimate>> storyEstimates = getEstimatesFromStory(id);
+
+			// Delete all story estimates
+			for (List<Estimate> estimates : storyEstimates.values()) {
+				for (Estimate estimate : estimates) {
+					deleteEstimateFromStory(id, estimate.getId());
+				}
 			}
+
+			PreparedStatement ps = connection.prepareStatement("DELETE FROM stories where id=?");
+			ps.setInt(1, id);
+
+			debug("Deleting story with id: " + id);
+
+			ps.executeUpdate();
+
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
-		
-		PreparedStatement ps = connection.prepareStatement("DELETE FROM stories where id=?");
-		ps.setInt(1, id);
 
-		debug("Deleting story with id: " + id);
-
-		ps.executeUpdate();
-
-		connection.close();
 	}
 
 	@Override
-	public User getUser(int id) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-
-		PreparedStatement ps = connection.prepareStatement("SELECT id, name FROM users where id=? LIMIT 1");
-		ps.setInt(1, id);
-
+	public User getUser(int id) {
 		User user = null;
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-		ResultSet res = ps.executeQuery();
+			PreparedStatement ps = connection.prepareStatement("SELECT id, name FROM users where id=? LIMIT 1");
+			ps.setInt(1, id);
 
-		while (res.next()) {
-			user = new User(res.getInt("id"), res.getString("name"));
-			debug("Fetching user: " + user.toString());
+			ResultSet res = ps.executeQuery();
+
+			while (res.next()) {
+				user = new User(res.getInt("id"), res.getString("name"));
+				debug("Fetching user: " + user.toString());
+			}
+
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
-
-		connection.close();
 
 		return user;
 	}
 
 	@Override
-	public void insertUser(User user) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-		PreparedStatement ps = connection.prepareStatement("INSERT into users (name) values (?)");
-		ps.setString(1, user.getName());
+	public void insertUser(User user) {
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			PreparedStatement ps = connection.prepareStatement("INSERT into users (name) values (?)");
+			ps.setString(1, user.getName());
 
-		debug("Inserting user: " + user.toString());
+			debug("Inserting user: " + user.toString());
 
-		ps.executeUpdate();
+			ps.executeUpdate();
 
-		connection.close();
-	}
-
-	@Override
-	public void deleteUser(int id) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-		
-		// Should delete from task_team
-		PreparedStatement ps = connection.prepareStatement("DELETE FROM task_team where user_id=?");
-		ps.setInt(1, id);
-
-		debug("Deleting user from all tasks: " + id);
-
-		ps.executeUpdate();
-		
-		// Should delete from story_user_estimations
-		ps = connection.prepareStatement("DELETE FROM story_user_estimations where user_id=?");
-		ps.setInt(1, id);
-
-		debug("Deleting all estimations for user: " + id);
-
-		ps.executeUpdate();
-		
-		// Delete user at last
-		ps = connection.prepareStatement("DELETE FROM users where id=?");
-		ps.setInt(1, id);
-
-		debug("Deleting user with id: " + id);
-
-		ps.executeUpdate();
-
-		connection.close();
-	}
-
-	@Override
-	public void setUser(User user) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-
-		PreparedStatement ps = connection.prepareStatement("UPDATE users SET name=? where id=?");
-		ps.setString(1, user.getName());
-		ps.setInt(2, user.getId());
-
-		debug("Setting user: " + user.toString());
-
-		ps.executeUpdate();
-
-		connection.close();
-
-	}
-
-	@Override
-	public Estimate getEstimate(int id) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-
-		PreparedStatement ps = connection
-				.prepareStatement("SELECT id, task_id, complexity_symbol, unit, unit_value FROM estimations where id=? LIMIT 1");
-		ps.setInt(1, id);
-
-		Estimate estimate = null;
-
-		ResultSet res = ps.executeQuery();
-
-		while (res.next()) {
-			estimate = new Estimate(res.getInt("id"), res.getInt("task_id"), res.getString("complexity_symbol"),
-					UnitType.values()[res.getInt("unit")], res.getInt("unit_value"));
-			debug("Fetching estimate: " + estimate.toString());
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
 
-		connection.close();
+	}
+
+	@Override
+	public void deleteUser(int id) {
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+
+			// Should delete from task_team
+			PreparedStatement ps = connection.prepareStatement("DELETE FROM task_team where user_id=?");
+			ps.setInt(1, id);
+
+			debug("Deleting user from all tasks: " + id);
+
+			ps.executeUpdate();
+
+			// Should delete from story_user_estimations
+			ps = connection.prepareStatement("DELETE FROM story_user_estimations where user_id=?");
+			ps.setInt(1, id);
+
+			debug("Deleting all estimations for user: " + id);
+
+			ps.executeUpdate();
+
+			// Delete user at last
+			ps = connection.prepareStatement("DELETE FROM users where id=?");
+			ps.setInt(1, id);
+
+			debug("Deleting user with id: " + id);
+
+			ps.executeUpdate();
+
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+
+	}
+
+	@Override
+	public void setUser(User user) {
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+
+			PreparedStatement ps = connection.prepareStatement("UPDATE users SET name=? where id=?");
+			ps.setString(1, user.getName());
+			ps.setInt(2, user.getId());
+
+			debug("Setting user: " + user.toString());
+
+			ps.executeUpdate();
+
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+
+	}
+
+	@Override
+	public Estimate getEstimate(int id) {
+		Estimate estimate = null;
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+
+			PreparedStatement ps = connection
+					.prepareStatement("SELECT id, task_id, complexity_symbol, unit, unit_value FROM estimations where id=? LIMIT 1");
+			ps.setInt(1, id);
+
+			ResultSet res = ps.executeQuery();
+
+			while (res.next()) {
+				estimate = new Estimate(res.getInt("id"), res.getInt("task_id"), res.getString("complexity_symbol"),
+						UnitType.values()[res.getInt("unit")], res.getInt("unit_value"));
+				debug("Fetching estimate: " + estimate.toString());
+			}
+
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 
 		return estimate;
 	}
 
 	@Override
-	public void setEstimate(Estimate estimate) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+	public void setEstimate(Estimate estimate) {
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-		PreparedStatement ps = connection
-				.prepareStatement("UPDATE estimations SET complexity_symbol=?, unit=?, unit_value=? where id=?");
-		ps.setString(1, estimate.getComplexitySymbol());
-		ps.setInt(2, estimate.getUnit().getCode());
-		ps.setFloat(3, estimate.getUnitValue());
-		ps.setInt(4, estimate.getId());
+			PreparedStatement ps = connection
+					.prepareStatement("UPDATE estimations SET complexity_symbol=?, unit=?, unit_value=? where id=?");
+			ps.setString(1, estimate.getComplexitySymbol());
+			ps.setInt(2, estimate.getUnit().getCode());
+			ps.setFloat(3, estimate.getUnitValue());
+			ps.setInt(4, estimate.getId());
 
-		debug("Setting estimate: " + estimate.toString());
+			debug("Setting estimate: " + estimate.toString());
 
-		ps.executeUpdate();
+			ps.executeUpdate();
 
-		connection.close();
-	}
-
-	@Override
-	public void insertEstimate(Estimate estimate) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-		PreparedStatement ps = connection
-				.prepareStatement("INSERT into estimations (task_id, complexity_symbol, unit, unit_value) values (?,?,?,?)");
-		ps.setInt(2, estimate.getTaskId());
-		ps.setString(1, estimate.getComplexitySymbol());
-		ps.setInt(2, estimate.getUnit().getCode());
-		ps.setFloat(3, estimate.getUnitValue());
-
-		debug("Inserting estimate: " + estimate.toString());
-
-		ps.executeUpdate();
-
-		connection.close();
-	}
-
-	@Override
-	public void deleteEstimate(int id) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-
-		PreparedStatement ps = connection.prepareStatement("DELETE FROM estimations where id=?");
-		ps.setInt(1, id);
-
-		debug("Deleting estimate with id: " + id);
-		ps.executeUpdate();
-
-		connection.close();
-	}
-
-	@Override
-	public List<Story> getStoriesFromTask(int task_id) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-
-		PreparedStatement ps = connection
-				.prepareStatement("SELECT id, task_id, name, description, consensus, iteration FROM stories where task_id=?");
-		ps.setInt(1, task_id);
-
-		List<Story> stories = new ArrayList<Story>();
-		Story story = null;
-
-		ResultSet res = ps.executeQuery();
-
-		while (res.next()) {
-			story = new Story(res.getInt("id"), res.getInt("task_id"), res.getString("name"),
-					res.getString("description"), res.getInt("consensus"), res.getInt("iteration"));
-			stories.add(story);
-			debug("Fetching story: " + story.toString());
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
 
-		connection.close();
+	}
+
+	@Override
+	public void insertEstimate(Estimate estimate) {
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			PreparedStatement ps = connection
+					.prepareStatement("INSERT into estimations (task_id, complexity_symbol, unit, unit_value) values (?,?,?,?)");
+			ps.setInt(2, estimate.getTaskId());
+			ps.setString(1, estimate.getComplexitySymbol());
+			ps.setInt(2, estimate.getUnit().getCode());
+			ps.setFloat(3, estimate.getUnitValue());
+
+			debug("Inserting estimate: " + estimate.toString());
+
+			ps.executeUpdate();
+
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+
+	}
+
+	@Override
+	public void deleteEstimate(int id) {
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+
+			PreparedStatement ps = connection.prepareStatement("DELETE FROM estimations where id=?");
+			ps.setInt(1, id);
+
+			debug("Deleting estimate with id: " + id);
+			ps.executeUpdate();
+
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
+
+	}
+
+	@Override
+	public List<Story> getStoriesFromTask(int task_id) {
+		List<Story> stories = new ArrayList<Story>();
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+
+			PreparedStatement ps = connection
+					.prepareStatement("SELECT id, task_id, name, description, consensus, iteration FROM stories where task_id=?");
+			ps.setInt(1, task_id);
+
+			Story story = null;
+
+			ResultSet res = ps.executeQuery();
+
+			while (res.next()) {
+				story = new Story(res.getInt("id"), res.getInt("task_id"), res.getString("name"),
+						res.getString("description"), res.getInt("consensus"), res.getInt("iteration"));
+				stories.add(story);
+				debug("Fetching story: " + story.toString());
+			}
+
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+		}
 
 		return stories;
 	}
 
 	@Override
-	public List<User> getUsersFromTask(int task_id) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-
-		PreparedStatement ps = connection
-				.prepareStatement("SELECT id, name from users join task_team on users.id=task_team.user_id where task_team.task_id=?");
-		ps.setInt(1, task_id);
-
+	public List<User> getUsersFromTask(int task_id) {
 		List<User> users = new ArrayList<User>();
-		User user = null;
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-		ResultSet res = ps.executeQuery();
+			PreparedStatement ps = connection
+					.prepareStatement("SELECT id, name from users join task_team on users.id=task_team.user_id where task_team.task_id=?");
+			ps.setInt(1, task_id);
 
-		while (res.next()) {
-			user = new User(res.getInt("User.id"), res.getString("User.name"));
-			users.add(user);
-			debug("Fetching user: " + user.toString());
+			User user = null;
+
+			ResultSet res = ps.executeQuery();
+
+			while (res.next()) {
+				user = new User(res.getInt("User.id"), res.getString("User.name"));
+				users.add(user);
+				debug("Fetching user: " + user.toString());
+			}
+
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
-
-		connection.close();
 
 		return users;
 	}
 
 	@Override
-	public HashMap<User, List<Estimate>> getEstimatesFromStory(int story_id) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-
-		PreparedStatement ps = connection
-				.prepareStatement("SELECT estimations.id, task_id, complexity_symbol, unit, unit_value FROM estimations where id=? LIMIT 1");
-		ps.setInt(1, story_id);
-
-		List<User> users = getUsersFromTask(getStory(story_id).getTaskId());
+	public HashMap<User, List<Estimate>> getEstimatesFromStory(int story_id) {
 		HashMap<User, List<Estimate>> storyEstimations = new HashMap<User, List<Estimate>>();
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-		for (User user : users) {
-			storyEstimations.put(user, getEstimatesFromUser(user.getId()));
+			PreparedStatement ps = connection
+					.prepareStatement("SELECT estimations.id, task_id, complexity_symbol, unit, unit_value FROM estimations where id=? LIMIT 1");
+			ps.setInt(1, story_id);
+
+			List<User> users = getUsersFromTask(getStory(story_id).getTaskId());
+
+			for (User user : users) {
+				storyEstimations.put(user, getEstimatesFromUser(user.getId()));
+			}
+
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
-
-		connection.close();
 
 		return storyEstimations;
 	}
 
 	@Override
-	public List<Estimate> getEstimatesFromUser(int user_id) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-
-		PreparedStatement ps = connection
-				.prepareStatement("SELECT estimations.id, estimations.task_id, estimations.complexity_symbol, estimations.unit, estimations.unit_value FROM estimations join story_user_estimations on story_user_estimations.estimation_id=estimations_id where user_id=?");
-		ps.setInt(1, user_id);
-
+	public List<Estimate> getEstimatesFromUser(int user_id) {
 		List<Estimate> estimations = new ArrayList<Estimate>();
-		Estimate estimate = null;
 
-		ResultSet res = ps.executeQuery();
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-		while (res.next()) {
-			estimate = new Estimate(res.getInt("id"), res.getInt("task_id"), res.getString("complexity_symbol"),
-					UnitType.values()[res.getInt("unit")], res.getInt("unit_value"));
-			debug("Fetching estimate: " + estimate.toString());
-			estimations.add(estimate);
+			PreparedStatement ps = connection
+					.prepareStatement("SELECT estimations.id, estimations.task_id, estimations.complexity_symbol, estimations.unit, estimations.unit_value FROM estimations join story_user_estimations on story_user_estimations.estimation_id=estimations_id where user_id=?");
+			ps.setInt(1, user_id);
+
+			Estimate estimate = null;
+
+			ResultSet res = ps.executeQuery();
+
+			while (res.next()) {
+				estimate = new Estimate(res.getInt("id"), res.getInt("task_id"), res.getString("complexity_symbol"),
+						UnitType.values()[res.getInt("unit")], res.getInt("unit_value"));
+				debug("Fetching estimate: " + estimate.toString());
+				estimations.add(estimate);
+			}
+
+			connection.close();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
 		}
-
-		connection.close();
 
 		return estimations;
 	}
 
 	@Override
-	public void deleteEstimateFromStory(int story_id, int estimate_id) throws SQLException {
-		 connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-		
-		 PreparedStatement ps =
-		 connection.prepareStatement("DELETE FROM story_user_estimations where story_id = ? and estimate_id=?");
-		 ps.setInt(1, story_id);
-		 ps.setInt(2, estimate_id);
-		
-		 debug(String.format("Deleting estimate [%d] from story [%d]", estimate_id, story_id));
-		 ps.executeUpdate();
-		
-		 connection.close();
-	}
-	@Override
-	public void deleteUserFromTask(int task_id, int user_id) throws SQLException {
-		 connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-			
-		 PreparedStatement ps =
-		 connection.prepareStatement("DELETE FROM task_team where task_id = ? and user_id=?");
-		 ps.setInt(1, task_id);
-		 ps.setInt(2, user_id);
-		
-		 debug(String.format("Deleting user [%d] from task [%d]", user_id, task_id));
-		 ps.executeUpdate();
-		
-		 connection.close();
-	}
-	
-	@Override
-	public void addUserToTask(int task_id, int user_id) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+	public void deleteEstimateFromStory(int story_id, int estimate_id) {
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-		PreparedStatement ps = connection.prepareStatement("INSERT INTO task_team (user_id, task_id) VALUES (?,?)");
-		ps.setInt(1, task_id);
-		ps.setInt(2, user_id);
+			PreparedStatement ps = connection
+					.prepareStatement("DELETE FROM story_user_estimations where story_id = ? and estimate_id=?");
+			ps.setInt(1, story_id);
+			ps.setInt(2, estimate_id);
 
-		debug("Adding user [" + user_id + "] to task [" + task_id + "]");
-		ps.executeUpdate();
+			debug(String.format("Deleting estimate [%d] from story [%d]", estimate_id, story_id));
+			ps.executeUpdate();
 
-		connection.close();
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
-	public void addEstimateToStory(int story_id, int user_id, int estimate_id) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+	public void deleteUserFromTask(int task_id, int user_id) {
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-		PreparedStatement ps = connection
-				.prepareStatement("INSERT INTO story_user_estimations (story_id, user_id, estimation_id) VALUES (?,?,?)");
-		ps.setInt(1, story_id);
-		ps.setInt(2, user_id);
-		ps.setInt(3, estimate_id);
+			PreparedStatement ps = connection.prepareStatement("DELETE FROM task_team where task_id = ? and user_id=?");
+			ps.setInt(1, task_id);
+			ps.setInt(2, user_id);
 
-		debug("Adding estimate [" + estimate_id + "] to story [" + story_id + "] for user [" + user_id + "]");
-		ps.executeUpdate();
+			debug(String.format("Deleting user [%d] from task [%d]", user_id, task_id));
+			ps.executeUpdate();
 
-		connection.close();
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
-	public List<Estimate> getEstimationsForTask(int task_id) throws SQLException {
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+	public void addUserToTask(int task_id, int user_id) {
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-		PreparedStatement ps = connection
-				.prepareStatement("SELECT id, task_id, complexity_symbol, unit, unit_value from estimations where task_id = ? ");
-		ps.setInt(1, task_id);
+			PreparedStatement ps = connection.prepareStatement("INSERT INTO task_team (user_id, task_id) VALUES (?,?)");
+			ps.setInt(1, task_id);
+			ps.setInt(2, user_id);
 
-		debug("Fetching estimate with id: " + task_id);
+			debug("Adding user [" + user_id + "] to task [" + task_id + "]");
+			ps.executeUpdate();
 
-		List<Estimate> estimations = new ArrayList<Estimate>();
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
-		Estimate estimate = null;
+	@Override
+	public void addEstimateToStory(int story_id, int user_id, int estimate_id) {
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-		ResultSet res = ps.executeQuery();
+			PreparedStatement ps = connection
+					.prepareStatement("INSERT INTO story_user_estimations (story_id, user_id, estimation_id) VALUES (?,?,?)");
+			ps.setInt(1, story_id);
+			ps.setInt(2, user_id);
+			ps.setInt(3, estimate_id);
 
-		while (res.next()) {
-			estimate = new Estimate(res.getInt("id"), res.getInt("task_id"), res.getString("complexity_symbol"),
-					UnitType.values()[res.getInt("unit")], res.getInt("unit_value"));
-			debug("Fetching estimate: " + estimate.toString());
-			estimations.add(estimate);
+			debug("Adding estimate [" + estimate_id + "] to story [" + story_id + "] for user [" + user_id + "]");
+			ps.executeUpdate();
+
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
 
-		connection.close();
+	}
+
+	@Override
+	public List<Estimate> getEstimationsForTask(int task_id) {
+		List<Estimate> estimations = new ArrayList<Estimate>();
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+
+			PreparedStatement ps = connection
+					.prepareStatement("SELECT id, task_id, complexity_symbol, unit, unit_value from estimations where task_id = ? ");
+			ps.setInt(1, task_id);
+
+			debug("Fetching estimate with id: " + task_id);
+
+			Estimate estimate = null;
+
+			ResultSet res = ps.executeQuery();
+
+			while (res.next()) {
+				estimate = new Estimate(res.getInt("id"), res.getInt("task_id"), res.getString("complexity_symbol"),
+						UnitType.values()[res.getInt("unit")], res.getInt("unit_value"));
+				debug("Fetching estimate: " + estimate.toString());
+				estimations.add(estimate);
+			}
+
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
 		return estimations;
 	}
-	
-	public List<Task> getTasks() throws SQLException{
-		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-		PreparedStatement ps = connection
-				.prepareStatement("SELECT id from tasks");
+
+	public List<Task> getTasks() {
 		List<Task> tasks = new ArrayList<Task>();
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-		debug("Getting all tasks");
-		
-		ResultSet res = ps.executeQuery();
-		while (res.next()) {
-			tasks.add(getTask(res.getInt("id")));
+			PreparedStatement ps = connection.prepareStatement("SELECT id from tasks");
+
+			debug("Getting all tasks");
+
+			ResultSet res = ps.executeQuery();
+			while (res.next()) {
+				tasks.add(getTask(res.getInt("id")));
+			}
+			connection.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		
-		connection.close();
-		
+
 		return tasks;
-		
+
 	}
 
 }

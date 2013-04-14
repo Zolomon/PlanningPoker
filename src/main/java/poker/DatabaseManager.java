@@ -785,7 +785,7 @@ public class DatabaseManager {
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-			PreparedStatement ps = connection.prepareStatement("SELECT id from tasks");
+			PreparedStatement ps = connection.prepareStatement("SELECT id from tasks ORDER BY id ASC");
 
 			debug("Getting all tasks");
 

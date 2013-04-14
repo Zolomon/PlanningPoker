@@ -79,9 +79,30 @@ public class Main {
 				/* Create a data-model */
 				Map<String, Object> root = new HashMap<String, Object>();
 				root.put("tasks", dm.getTasks());
-
-				return render("index.ftl", cfg, root);
+				
+				return render("index.ftl", cfg ,root);
 			}
+		});
+		
+		get(new Route("/tasks/edit/info/:id") {
+
+			@Override
+			public Object handle(Request request, Response response) {
+				  return "Hello: " + request.params(":id");
+			}
+			
+		});
+		
+		get(new Route("/task/new") {
+
+			@Override
+			public Object handle(Request request, Response response) {
+				
+				/* Create a data-model */
+				Map<String, Object> root = new HashMap<String, Object>();
+				return  render("newtask.ftl", cfg, root);
+			}
+			
 		});
 
 		post(new Route("/task") {

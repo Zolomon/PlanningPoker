@@ -1,7 +1,10 @@
 package poker;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+
+import org.javatuples.Pair;
 
 import poker.entities.*;
 
@@ -28,7 +31,7 @@ public interface IEntityManager {
 	
 	List<Story> getStoriesFromTask(int task_id) throws SQLException;
 	List<User> getUsersFromTask(int task_id) throws SQLException;
-	List<Estimate> getEstimatesFromStory(int story_id) throws SQLException;
+	HashMap<User, List<Estimate>> getEstimatesFromStory(int story_id) throws SQLException;
 	List<Estimate> getEstimatesFromUser(int user_id) throws SQLException;
 		
 	void addUserToTask(int task_id, User user) throws SQLException;

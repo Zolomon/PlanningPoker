@@ -11,8 +11,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
+import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -428,26 +431,97 @@ public class DatabaseManager implements IEntityManager {
 
 	@Override
 	public List<Story> getStoriesFromTask(int task_id) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+
+		PreparedStatement ps = connection
+				.prepareStatement("SELECT id, task_id, name, description, consensus, iteration FROM stories where task_id=?");
+		ps.setInt(1, task_id);
+
+		List<Story> stories = new ArrayList<Story>();
+		Story story = null;
+
+		ResultSet res = ps.executeQuery();
+
+		while (res.next()) {
+			story = new Story(res.getInt("id"), res.getInt("task_id"), res.getString("name"),
+					res.getString("description"), res.getInt("consensus"), res.getInt("iteration"));
+			stories.add(story);
+			debug("Fetching story: " + story.toString());
+		}
+
+		connection.close();
+
+		return stories;
 	}
 
 	@Override
 	public List<User> getUsersFromTask(int task_id) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+
+		PreparedStatement ps = connection
+				.prepareStatement("SELECT id, name from users join task_team on users.id=task_team.user_id where task_team.task_id=?");
+		ps.setInt(1, task_id);
+
+		List<User> users = new ArrayList<User>();
+		User user = null;
+
+		ResultSet res = ps.executeQuery();
+
+		while (res.next()) {
+			user = new User(res.getInt("User.id"), res.getString("User.name"));
+			users.add(user);
+			debug("Fetching user: " + user.toString());
+		}
+
+		connection.close();
+
+		return users;
 	}
 
 	@Override
-	public List<Estimate> getEstimatesFromStory(int story_id) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+	public HashMap<User, List<Estimate>> getEstimatesFromStory(int story_id) throws SQLException {
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+
+		PreparedStatement ps = connection
+				.prepareStatement("SELECT estimations.id, task_id, complexity_symbol, unit, unit_value FROM estimations where id=? LIMIT 1");
+		ps.setInt(1, story_id);
+
+		List<User> users = getUsersFromTask(getStory(story_id).getTaskId());
+		HashMap<User, List<Estimate>> storyEstimations = new HashMap<User, List<Estimate>>();
+		
+		for (User user : users) {
+			storyEstimations.put(user, getEstimatesFromUser(user.getId()));
+		}
+
+		connection.close();
+
+		return storyEstimations;
 	}
 
 	@Override
 	public List<Estimate> getEstimatesFromUser(int user_id) throws SQLException {
-		// TODO Auto-generated method stub
-		return null;
+		connection = DriverManager.getConnection("jdbc:sqlite:poker.db");
+
+		PreparedStatement ps = connection
+				.prepareStatement(
+		"SELECT estimations.id, estimations.task_id, estimations.complexity_symbol, estimations.unit, estimations.unit_value FROM estimations join story_user_estimations on story_user_estimations.estimation_id=estimations_id where user_id=?");
+		ps.setInt(1, user_id);
+
+		List<Estimate> estimations = new ArrayList<Estimate>();
+		Estimate estimate = null;
+
+		ResultSet res = ps.executeQuery();
+		
+		while (res.next()) {
+			estimate = new Estimate(res.getInt("id"), res.getInt("task_id"), res.getString("complexity_symbol"),
+					UnitType.values()[res.getInt("unit")], res.getInt("unit_value"));
+			debug("Fetching estimate: " + estimate.toString());
+			estimations.add(estimate);
+		}
+
+		connection.close();
+
+		return estimations;
 	}
 
 	@Override

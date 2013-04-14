@@ -263,7 +263,6 @@ public class DatabaseManager implements IEntityManager {
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
-
 	}
 
 	@Override

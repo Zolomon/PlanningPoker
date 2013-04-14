@@ -105,15 +105,29 @@ public class Main {
 			
 		});
 		
-		post(new Route("/task/new/estimation") {
+		post(new Route("/task/new/estimationsettings") {
 
 			@Override
 			public Object handle(Request request, Response response) {
-				
+
+				dm.insertTask(new Task(request.queryParams("taskname"), request.queryParams("taskdescription")));
+
 				/* Create a data-model */
 				Map<String, Object> root = new HashMap<String, Object>();
 				root.put("taskname", request.queryParams("taskname"));
 				return render("newtaskestimations.ftl", cfg, root);
+			}
+			
+		});
+		
+		post(new Route("/tasks/new/stories") {
+
+			@Override
+			public Object handle(Request request, Response response) {
+
+				/* Create a data-model */
+				Map<String, Object> root = new HashMap<String, Object>();
+				return render("newtaskstories.ftl", cfg, root);
 			}
 			
 		});

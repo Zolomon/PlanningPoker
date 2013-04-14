@@ -31,15 +31,14 @@ public interface IEntityManager {
 	
 	List<Story> getStoriesFromTask(int task_id) throws SQLException;
 	List<User> getUsersFromTask(int task_id) throws SQLException;
+	List<Estimate> getEstimationsForTask(int task_id) throws SQLException;
 	HashMap<User, List<Estimate>> getEstimatesFromStory(int story_id) throws SQLException;
 	List<Estimate> getEstimatesFromUser(int user_id) throws SQLException;
 		
-	void addUserToTask(int task_id, User user) throws SQLException;
-	void addStoryToTask(int task_id, Story story) throws SQLException;
-	void addEstimateToStory(int story_id, Estimate estimate) throws SQLException;
+	void addUserToTask(int task_id, int user_id) throws SQLException;
+	void addEstimateToStory(int story_id, int user_id, int estimate_id) throws SQLException;
 	
 	void deleteUserFromTask(int task_id, int user_id) throws SQLException;
-	void deleteStoryFromTask(int task_id, int story_id) throws SQLException;
 	void deleteEstimateFromStory(int story_id, int estimate_id) throws SQLException;
 	
 	//void deleteAllStoriesForTask(int task_id) throws SQLException;

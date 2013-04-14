@@ -5,7 +5,7 @@ public class Estimate {
 	private int task_id;
 	private String complexity_symbol;
 	private UnitType unit;
-	private int unit_value;
+	private float unit_value;
 
 	/***
 	 * Constructor for when creating a new Estimate
@@ -15,7 +15,7 @@ public class Estimate {
 	 * @param unit_value
 	 */
 	public Estimate(int task_id, String complexity_symbol, UnitType unit,
-			int unit_value) {
+			float unit_value) {
 		this.setTaskId(task_id);
 		this.setComplexitySymbol(complexity_symbol);
 		this.setUnit(unit);
@@ -31,7 +31,7 @@ public class Estimate {
 	 * @param unit_value
 	 */
 	public Estimate(int id, int task_id, String complexity_symbol,
-			UnitType unit, int unit_value) {
+			UnitType unit, float unit_value) {
 		this.setId(id);
 		this.setTaskId(task_id);
 		this.setComplexitySymbol(complexity_symbol);
@@ -71,11 +71,16 @@ public class Estimate {
 		this.unit = unit;
 	}
 
-	public int getUnitValue() {
+	public float getUnitValue() {
 		return unit_value;
 	}
 
-	public void setUnitValue(int unit_value) {
+	public void setUnitValue(float unit_value) {
 		this.unit_value = unit_value;
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("[%d, %d, %s, %s, %f]", getId(), getTaskId(), getComplexitySymbol(), getUnit().name(), getUnitValue()); 
 	}
 }

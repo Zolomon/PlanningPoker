@@ -26,7 +26,7 @@ import poker.entities.Task;
 import poker.entities.UnitType;
 import poker.entities.User;
 
-public class DatabaseManager implements IEntityManager {
+public class DatabaseManager {
 	private static final String	JDBC_SQLITE_POKER_DB	= "jdbc:sqlite:poker.db";
 	private Connection			connection				= null;
 	private SimpleDateFormat	dateFormat				= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -192,7 +192,6 @@ public class DatabaseManager implements IEntityManager {
 		insertEstimate(new Estimate(task_id, "coffee", UnitType.PERSON_DAYS, -1));
 	}
 
-	@Override
 	public Task getTask(int id) {
 		Task task = null;
 		try {
@@ -225,7 +224,6 @@ public class DatabaseManager implements IEntityManager {
 		return task;
 	}
 
-	@Override
 	public void setTask(Task task) {
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -248,7 +246,7 @@ public class DatabaseManager implements IEntityManager {
 
 	}
 
-	public void insertTask(Task task) {
+	public int insertTask(Task task) {
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 			PreparedStatement ps = connection.prepareStatement("INSERT into tasks (name, description) values (?,?)");
@@ -264,9 +262,10 @@ public class DatabaseManager implements IEntityManager {
 			e1.printStackTrace();
 		}
 
+		return getLatestTask();
+
 	}
 
-	@Override
 	public void deleteTask(int id) {
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -297,7 +296,6 @@ public class DatabaseManager implements IEntityManager {
 
 	}
 
-	@Override
 	public Story getStory(int id) {
 		Story story = null;
 		try {
@@ -324,7 +322,6 @@ public class DatabaseManager implements IEntityManager {
 		return story;
 	}
 
-	@Override
 	public void setStory(Story story) {
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -348,8 +345,7 @@ public class DatabaseManager implements IEntityManager {
 
 	}
 
-	@Override
-	public void insertStory(Story story) {
+	public int insertStory(Story story) {
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 			PreparedStatement ps = connection
@@ -366,10 +362,9 @@ public class DatabaseManager implements IEntityManager {
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
-
+		return getLatestStory();
 	}
 
-	@Override
 	public void deleteStory(int id) {
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -397,7 +392,6 @@ public class DatabaseManager implements IEntityManager {
 
 	}
 
-	@Override
 	public User getUser(int id) {
 		User user = null;
 		try {
@@ -421,8 +415,7 @@ public class DatabaseManager implements IEntityManager {
 		return user;
 	}
 
-	@Override
-	public void insertUser(User user) {
+	public int insertUser(User user) {
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 			PreparedStatement ps = connection.prepareStatement("INSERT into users (name) values (?)");
@@ -436,10 +429,9 @@ public class DatabaseManager implements IEntityManager {
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
-
+		return getLatestUser();
 	}
 
-	@Override
 	public void deleteUser(int id) {
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -475,7 +467,6 @@ public class DatabaseManager implements IEntityManager {
 
 	}
 
-	@Override
 	public void setUser(User user) {
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -495,7 +486,6 @@ public class DatabaseManager implements IEntityManager {
 
 	}
 
-	@Override
 	public Estimate getEstimate(int id) {
 		Estimate estimate = null;
 		try {
@@ -521,7 +511,6 @@ public class DatabaseManager implements IEntityManager {
 		return estimate;
 	}
 
-	@Override
 	public void setEstimate(Estimate estimate) {
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -544,8 +533,7 @@ public class DatabaseManager implements IEntityManager {
 
 	}
 
-	@Override
-	public void insertEstimate(Estimate estimate) {
+	public int insertEstimate(Estimate estimate) {
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 			PreparedStatement ps = connection
@@ -563,10 +551,9 @@ public class DatabaseManager implements IEntityManager {
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
-
+		return getLatestEstimate();
 	}
 
-	@Override
 	public void deleteEstimate(int id) {
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -584,7 +571,6 @@ public class DatabaseManager implements IEntityManager {
 
 	}
 
-	@Override
 	public List<Story> getStoriesFromTask(int task_id) {
 		List<Story> stories = new ArrayList<Story>();
 		try {
@@ -613,7 +599,6 @@ public class DatabaseManager implements IEntityManager {
 		return stories;
 	}
 
-	@Override
 	public List<User> getUsersFromTask(int task_id) {
 		List<User> users = new ArrayList<User>();
 		try {
@@ -641,7 +626,6 @@ public class DatabaseManager implements IEntityManager {
 		return users;
 	}
 
-	@Override
 	public HashMap<User, List<Estimate>> getEstimatesFromStory(int story_id) {
 		HashMap<User, List<Estimate>> storyEstimations = new HashMap<User, List<Estimate>>();
 		try {
@@ -665,7 +649,6 @@ public class DatabaseManager implements IEntityManager {
 		return storyEstimations;
 	}
 
-	@Override
 	public List<Estimate> getEstimatesFromUser(int user_id) {
 		List<Estimate> estimations = new ArrayList<Estimate>();
 
@@ -695,7 +678,6 @@ public class DatabaseManager implements IEntityManager {
 		return estimations;
 	}
 
-	@Override
 	public void deleteEstimateFromStory(int story_id, int estimate_id) {
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -714,7 +696,6 @@ public class DatabaseManager implements IEntityManager {
 		}
 	}
 
-	@Override
 	public void deleteUserFromTask(int task_id, int user_id) {
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -732,7 +713,6 @@ public class DatabaseManager implements IEntityManager {
 		}
 	}
 
-	@Override
 	public void addUserToTask(int task_id, int user_id) {
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -750,7 +730,6 @@ public class DatabaseManager implements IEntityManager {
 		}
 	}
 
-	@Override
 	public void addEstimateToStory(int story_id, int user_id, int estimate_id) {
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -771,7 +750,6 @@ public class DatabaseManager implements IEntityManager {
 
 	}
 
-	@Override
 	public List<Estimate> getEstimationsForTask(int task_id) {
 		List<Estimate> estimations = new ArrayList<Estimate>();
 		try {
@@ -825,4 +803,83 @@ public class DatabaseManager implements IEntityManager {
 
 	}
 
+	private int getLatestTask() {
+		int id = Integer.MIN_VALUE;
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+
+			PreparedStatement ps = connection.prepareStatement("SELECT id from tasks ORDER BY id DESC LIMIT 1");
+
+			ResultSet res = ps.executeQuery();
+			while (res.next()) {
+				debug(String.format("Getting newest task [%d]", res.getInt("id")));
+				id = res.getInt("id");
+			}
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return id;
+	}
+
+	private int getLatestStory() {
+		int id = Integer.MIN_VALUE;
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+
+			PreparedStatement ps = connection.prepareStatement("SELECT id from stories ORDER BY id DESC LIMIT 1");
+
+			ResultSet res = ps.executeQuery();
+			while (res.next()) {
+				debug(String.format("Getting newest story [%d]", res.getInt("id")));
+				id = res.getInt("id");
+			}
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return id;
+	}
+
+	private int getLatestUser() {
+		int id = Integer.MIN_VALUE;
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+
+			PreparedStatement ps = connection.prepareStatement("SELECT id from users ORDER BY id DESC LIMIT 1");
+
+			ResultSet res = ps.executeQuery();
+			while (res.next()) {
+				debug(String.format("Getting newest user [%d]", res.getInt("id")));
+				id = res.getInt("id");
+			}
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return id;
+	}
+
+	private int getLatestEstimate() {
+		int id = Integer.MIN_VALUE;
+		try {
+			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+
+			PreparedStatement ps = connection.prepareStatement("SELECT id from estimations ORDER BY id DESC LIMIT 1");
+
+			ResultSet res = ps.executeQuery();
+			while (res.next()) {
+				debug(String.format("Getting newest estimate [%d]", res.getInt("id")));
+				id = res.getInt("id");
+			}
+			connection.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return id;
+	}
 }

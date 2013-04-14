@@ -693,5 +693,24 @@ public class DatabaseManager implements IEntityManager {
 		connection.close();
 		return estimations;
 	}
+	
+	public List<Task> getTasks() throws SQLException{
+		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+		PreparedStatement ps = connection
+				.prepareStatement("SELECT id from tasks");
+		List<Task> tasks = new ArrayList<Task>();
+
+		debug("Getting all tasks");
+		
+		ResultSet res = ps.executeQuery();
+		while (res.next()) {
+			tasks.add(getTask(res.getInt("id")));
+		}
+		
+		connection.close();
+		
+		return tasks;
+		
+	}
 
 }

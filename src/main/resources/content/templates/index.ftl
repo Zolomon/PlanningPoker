@@ -9,8 +9,12 @@
 			<#list tasks as task>
 			<tr>
 			<#escape x as x?html>
+				<td class="span1">
+					<a href="/summary/<#noescape>${task.id}</#noescape>" class="btn btn-mini btn-info">Summary</a>
+				</td>
 				<td>
-				<a href="/tasks/edit/info/<#noescape>${task.id}</#noescape>">${task.name}</a></td>
+					<a href="/tasks/edit/info/<#noescape>${task.id}</#noescape>">${task.name}</a>
+				</td>
 			</#escape>
 			</tr>
 			</#list>

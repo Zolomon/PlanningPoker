@@ -19,7 +19,7 @@
 			</tr>
 			</#list>
 		</table>
-			<form class="navbar-form pull-left" method="get" action="/task/new">
+			<form class="navbar-form pull-left" method="get" action="/tasks/new">
 				<p>
 					<button class="btn btn-large btn-primary" type="submit">New task</button>
 				</p>

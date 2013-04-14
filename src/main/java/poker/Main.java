@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.ProcessBuilder.Redirect;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
@@ -93,7 +94,7 @@ public class Main {
 			
 		});
 		
-		get(new Route("/task/new") {
+		get(new Route("/tasks/new") {
 
 			@Override
 			public Object handle(Request request, Response response) {
@@ -105,29 +106,64 @@ public class Main {
 			
 		});
 		
-		post(new Route("/task/new/estimationsettings") {
+		post(new Route("/tasks/new/process"){
+
+			@Override
+			public Object handle(Request request, Response response) {
+				
+			int id = dm.insertTask(new Task(request.queryParams("taskname"), request.queryParams("taskdescription")));
+			response.redirect("/tasks/edit/estimationsettings/" + id);
+			return null;
+			}
+		});
+		
+		get(new Route("/tasks/edit/estimationsettings/:id") {
 
 			@Override
 			public Object handle(Request request, Response response) {
 
-				dm.insertTask(new Task(request.queryParams("taskname"), request.queryParams("taskdescription")));
-				
 				/* Create a data-model */
 				Map<String, Object> root = new HashMap<String, Object>();
-				root.put("taskname", request.queryParams("taskname"));
-				return render("newtaskestimations.ftl", cfg, root);
+				root.put("task", dm.getTask(Integer.parseInt(request.params("id"))));
+				return render("taskestimations.ftl", cfg, root);
 			}
 			
 		});
 		
-		post(new Route("/tasks/new/stories") {
+		post(new Route("/tasks/edit/estimationsettings/process") {
 
 			@Override
 			public Object handle(Request request, Response response) {
 
+				//insert operation krävs!!!!
+				response.redirect("/tasks/edit/stories/" + request.queryParams("taskid"));
+				return null;
+			}
+			
+		});
+		
+		get(new Route("/tasks/edit/stories/:id") {
+
+			@Override
+			public Object handle(Request request, Response response) {
+				
+
 				/* Create a data-model */
 				Map<String, Object> root = new HashMap<String, Object>();
-				return render("newtaskstories.ftl", cfg, root);
+				root.put("task", dm.getTask(Integer.parseInt(request.params("id"))));
+				return render("taskstories.ftl", cfg, root);
+			}
+			
+		});
+		
+		post(new Route("/tasks/edit/stories/process") {
+
+			@Override
+			public Object handle(Request request, Response response) {
+
+				//insert operation krävs!!!!
+				response.redirect("/index");
+				return null;
 			}
 			
 		});

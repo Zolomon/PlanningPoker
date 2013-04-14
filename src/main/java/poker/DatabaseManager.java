@@ -13,6 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 import org.javatuples.Pair;
@@ -256,9 +257,21 @@ public class DatabaseManager implements IEntityManager {
 	public void deleteTask(int id) throws SQLException {
 		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
+		// Clean stories
+		List<Story> stories = getStoriesFromTask(id);		
+		for(Story story : stories) {
+			deleteStory(story.getId());
+		}
+		
+		// Clean users
+		List<User> users = getUsersFromTask(id);
+		for(User user : users) {
+			deleteUserFromTask(id, user.getId());
+		}
+		
 		PreparedStatement ps = connection.prepareStatement("DELETE FROM tasks where id=?");
-		ps.setInt(1, id);
-
+		ps.setInt(1, id);	
+		
 		debug("Deleting task id: " + id);
 
 		ps.executeUpdate();
@@ -329,6 +342,16 @@ public class DatabaseManager implements IEntityManager {
 	public void deleteStory(int id) throws SQLException {
 		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
+		HashMap<User,List<Estimate>> storyEstimates = getEstimatesFromStory(id);
+		
+		// Delete all story estimates
+		for (List<Estimate> estimates : storyEstimates.values())
+		{
+			for (Estimate estimate : estimates) {
+				deleteEstimateFromStory(id, estimate.getId());
+			}
+		}
+		
 		PreparedStatement ps = connection.prepareStatement("DELETE FROM stories where id=?");
 		ps.setInt(1, id);
 
@@ -376,8 +399,25 @@ public class DatabaseManager implements IEntityManager {
 	@Override
 	public void deleteUser(int id) throws SQLException {
 		connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+		
+		// Should delete from task_team
+		PreparedStatement ps = connection.prepareStatement("DELETE FROM task_team where user_id=?");
+		ps.setInt(1, id);
 
-		PreparedStatement ps = connection.prepareStatement("DELETE FROM users where id=?");
+		debug("Deleting user from all tasks: " + id);
+
+		ps.executeUpdate();
+		
+		// Should delete from story_user_estimations
+		ps = connection.prepareStatement("DELETE FROM story_user_estimations where user_id=?");
+		ps.setInt(1, id);
+
+		debug("Deleting all estimations for user: " + id);
+
+		ps.executeUpdate();
+		
+		// Delete user at last
+		ps = connection.prepareStatement("DELETE FROM users where id=?");
 		ps.setInt(1, id);
 
 		debug("Deleting user with id: " + id);

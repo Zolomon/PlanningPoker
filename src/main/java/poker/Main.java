@@ -2,7 +2,7 @@ package poker;
 
 import static spark.Spark.get;
 import static spark.Spark.post;
-import static spark.Spark.staticFileRoute;
+import static spark.Spark.staticFileLocation;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,7 +59,7 @@ public class Main {
 			System.err.println(e.getStackTrace());
 		}
 
-		staticFileRoute("/content");
+		staticFileLocation("/content");
 
 		get(new Route("/hello") {
 			@Override

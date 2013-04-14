@@ -10,8 +10,11 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import poker.entities.Estimate;
+import poker.entities.Story;
 import poker.entities.Task;
 import spark.Request;
 import spark.Response;
@@ -96,8 +99,13 @@ public class Main {
 			@Override
 			public Object handle(Request request, Response response) {
 
+				int task_id = Integer.parseInt(request.params(":id"));
+				
 				Map<String, Object> root = new HashMap<String, Object>();
-				root.put("id", request.params(":id"));
+				root.put("id", task_id);
+				
+				List<Story> stories = dm.getStoriesFromTask(task_id);
+				root.put("stories", stories);
 				
 				return render("summary.ftl", cfg, root);
 			}

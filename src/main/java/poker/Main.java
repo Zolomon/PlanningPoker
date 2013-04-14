@@ -101,6 +101,19 @@ public class Main {
 			}
 			
 		});
+		
+		post(new Route("/task/new/estimation") {
+
+			@Override
+			public Object handle(Request request, Response response) {
+				
+				/* Create a data-model */
+				Map<String, Object> root = new HashMap<String, Object>();
+				root.put("taskname", request.queryParams("taskname"));
+				return render("newtaskestimations.ftl", cfg, root);
+			}
+			
+		});
 
 		post(new Route("/task") {
 			@Override

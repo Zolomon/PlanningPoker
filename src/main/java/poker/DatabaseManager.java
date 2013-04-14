@@ -263,7 +263,6 @@ public class DatabaseManager {
 		}
 
 		return getLatestTask();
-
 	}
 
 	public void deleteTask(int id) {

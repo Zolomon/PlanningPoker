@@ -15,9 +15,7 @@
 				<td>
 					<a href="/tasks/edit/info/<#noescape>${task.id}</#noescape>">${task.name}</a>
 				</td>
-			
 			</tr>
-			
 			
 			<tr>
 				<td colspan="2">

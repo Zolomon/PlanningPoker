@@ -198,6 +198,19 @@ public class Main {
 				return render("summary.ftl", cfg, root);
 			}
 		});
+		
+		get(new Route("/poker/:task_id/:user_id") {
+			@Override
+			public Object handle(Request request, Response response) {
+				
+				Map<String, Object> root = new HashMap<String, Object>();
+				int task_id = Integer.parseInt(request.params(":task_id"));
+				root.put("stories", dm.getStoriesFromTask(task_id));
+				root.put("users", dm.getUsersFromTask(task_id));
+				
+				return render("poker.ftl", cfg, root);
+			}
+		});
 
 	}
 

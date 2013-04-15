@@ -54,7 +54,7 @@
 	
 	<!-- footer section -->
 	<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
-	
+	<script src="http://localhost:4567/js/bootstrap.js"></script>
 	</body>
 	
 	</html>

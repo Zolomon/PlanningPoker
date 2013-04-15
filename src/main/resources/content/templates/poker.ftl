@@ -2,38 +2,36 @@
 
 <@c.page title="Planning Poker">
 
+<#escape x as x?html>
 <div class="row">
-	<h1>Tasks</h1>
+	<h1>Stories</h1>
 	<div class="span12">
 		<table class="table table-condensed table-hover">
-			<#list tasks as task>
-			<tr>
-			<#escape x as x?html>
-				<td class="span1">
-					<a href="/summary/<#noescape>${task.id}</#noescape>" class="btn btn-mini btn-info">Summary</a>
-				</td>
-				<td>
-					<a href="/tasks/edit/info/<#noescape>${task.id}</#noescape>">${task.name}</a>
-				</td>
-			
-			</tr>
-			
-			<#list task.users as user>
-			<tr>
-					<td colspan="2"><a href="/poker/<#noescape>${task.id}</#noescape>/<#noescape>${user.id}</#noescape>">${user.name}</a></td>
-			</tr>
+		
+			<#list stories as story>
+				<tr><td><a href="#" id="story-<#noescape>${story.id}</#noescape>" rel="popover">${story.name}</a></td></tr>
 			</#list>
-			<tr><td colspan="2">&nbsp;</td></tr>
-			</#escape> 
-			</#list>
+		
 		</table>
-			<form class="navbar-form pull-left" method="get" action="/tasks/new">
-				<p>
-					<button class="btn btn-large btn-primary" type="submit">New task</button>
-				</p>
-			</form>
+			
 	</div>
 </div>
 
+	<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+	<script src="http://localhost:4567/js/bootstrap.js"></script>
 
+<script type="text/javascript">
+
+<#list stories as story>
+var img${story.id} = '${story.description}';
+
+	$("#story-<#noescape>${story.id}</#noescape>").popover({ title: 'Story description', content: img${story.id}, placement: 'left', animation: true, trigger:'hover', delay: {show:333, hide:100} });
+
+</#list>
+
+
+</script>
+
+
+</#escape>
 </@c.page>

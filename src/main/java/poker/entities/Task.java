@@ -10,7 +10,7 @@ public class Task {
 	private String	description;
 	private Date	created_at;
 	private Date	published_at;
-
+	private List<User> users;
 	/***
 	 * Constructor for new Task
 	 * 
@@ -87,5 +87,13 @@ public class Task {
 				+ (getCreatedAt() != null ? new SimpleDateFormat("yyyy-MM-dd").format(getCreatedAt()) : "null") + ", "
 				+ (getPublishedAt() != null ? new SimpleDateFormat("yyyy-MM-dd").format(getPublishedAt()) : "null")
 				+ "]";
+	}
+
+	public List<User> getUsers() {
+		return users;
+	}
+
+	public void setUsers(List<User> users) {
+		this.users = users;
 	}
 }

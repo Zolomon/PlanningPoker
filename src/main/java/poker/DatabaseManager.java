@@ -604,7 +604,7 @@ public class DatabaseManager {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
 			PreparedStatement ps = connection
-					.prepareStatement("SELECT id, name from users join task_team on users.id=task_team.user_id where task_team.task_id=?");
+					.prepareStatement("SELECT users.id, users.name FROM users JOIN task_team ON users.id=task_team.user_id WHERE task_team.task_id=?");
 			ps.setInt(1, task_id);
 
 			User user = null;
@@ -612,7 +612,7 @@ public class DatabaseManager {
 			ResultSet res = ps.executeQuery();
 
 			while (res.next()) {
-				user = new User(res.getInt("User.id"), res.getString("User.name"));
+				user = new User(res.getInt("id"), res.getString("name"));
 				users.add(user);
 				debug("Fetching user: " + user.toString());
 			}
@@ -717,8 +717,8 @@ public class DatabaseManager {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
 			PreparedStatement ps = connection.prepareStatement("INSERT INTO task_team (user_id, task_id) VALUES (?,?)");
-			ps.setInt(1, task_id);
-			ps.setInt(2, user_id);
+			ps.setInt(1, user_id);
+			ps.setInt(2, task_id);
 
 			debug("Adding user [" + user_id + "] to task [" + task_id + "]");
 			ps.executeUpdate();

@@ -15,11 +15,19 @@
 				<td>
 					<a href="/tasks/edit/info/<#noescape>${task.id}</#noescape>">${task.name}</a>
 				</td>
-			</#escape>
+			
+			</tr>
+			
+			<#list task.users as user>
+			<tr>
+					<td colspan="2"><a href="/poker/<#noescape>${task.id}</#noescape>/<#noescape>${user.id}</#noescape>">${user.name}</a></td>
 			</tr>
 			</#list>
+			<tr><td colspan="2">&nbsp;</td></tr>
+			</#escape> 
+			</#list>
 		</table>
-			<form class="navbar-form pull-left" method="get" action="/task/new">
+			<form class="navbar-form pull-left" method="get" action="/tasks/new">
 				<p>
 					<button class="btn btn-large btn-primary" type="submit">New task</button>
 				</p>

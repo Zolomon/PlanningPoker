@@ -18,15 +18,11 @@
 			
 			</tr>
 			
-			
+			<#list task.users as user>
 			<tr>
-				<td colspan="2">
-					<#list task.users as user>
-						<a class="btn btn-primary btn-mini" href="/poker/<#noescape>${task.id}</#noescape>/<#noescape>${user.id}</#noescape>"><i class="icon-play icon-black"></i>&nbsp;&nbsp;${user.name}</a>
-					</#list>
-				</td>
+					<td colspan="2"><a href="/poker/<#noescape>${task.id}</#noescape>/<#noescape>${user.id}</#noescape>">${user.name}</a></td>
 			</tr>
-			
+			</#list>
 			<tr><td colspan="2">&nbsp;</td></tr>
 			</#escape> 
 			</#list>

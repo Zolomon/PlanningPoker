@@ -79,47 +79,47 @@ public class Main {
 				/* Create a data-model */
 				Map<String, Object> root = new HashMap<String, Object>();
 				root.put("tasks", dm.getTasks());
-				
-				return render("index.ftl", cfg ,root);
+
+				return render("index.ftl", cfg, root);
 			}
 		});
-		
+
 		get(new Route("/tasks/edit/info/:id") {
 
 			@Override
 			public Object handle(Request request, Response response) {
-				  return "Hello: " + request.params(":id");
+				return "Hello: " + request.params(":id");
 			}
-			
+
 		});
-		
+
 		get(new Route("/task/new") {
 
 			@Override
 			public Object handle(Request request, Response response) {
-				
+
 				/* Create a data-model */
 				Map<String, Object> root = new HashMap<String, Object>();
-				return  render("newtask.ftl", cfg, root);
+				return render("newtask.ftl", cfg, root);
 			}
-			
+
 		});
-		
+
 		post(new Route("/task/new/estimationsettings") {
 
 			@Override
 			public Object handle(Request request, Response response) {
 
 				dm.insertTask(new Task(request.queryParams("taskname"), request.queryParams("taskdescription")));
-				
+
 				/* Create a data-model */
 				Map<String, Object> root = new HashMap<String, Object>();
 				root.put("taskname", request.queryParams("taskname"));
 				return render("newtaskestimations.ftl", cfg, root);
 			}
-			
+
 		});
-		
+
 		post(new Route("/tasks/new/stories") {
 
 			@Override
@@ -129,7 +129,7 @@ public class Main {
 				Map<String, Object> root = new HashMap<String, Object>();
 				return render("newtaskstories.ftl", cfg, root);
 			}
-			
+
 		});
 
 		post(new Route("/task") {
@@ -148,13 +148,13 @@ public class Main {
 			public Object handle(Request request, Response response) {
 
 				int task_id = Integer.parseInt(request.params(":id"));
-				
+
 				Map<String, Object> root = new HashMap<String, Object>();
 				root.put("id", task_id);
-				
+
 				List<Story> stories = dm.getStoriesFromTask(task_id);
 				root.put("stories", stories);
-				
+
 				return render("summary.ftl", cfg, root);
 			}
 		});

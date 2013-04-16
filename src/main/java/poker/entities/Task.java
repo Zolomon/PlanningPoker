@@ -92,6 +92,10 @@ public class Task {
 	public List<User> getUsers() {
 		return users;
 	}
+	
+	public boolean isPublished() {
+		return published_at != null;
+	}
 
 	public void setUsers(List<User> users) {
 		this.users = users;

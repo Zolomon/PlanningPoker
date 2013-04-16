@@ -32,7 +32,8 @@
 				</tr>
 			</table>		
 			
-			<button type="submit" class="btn">Next</button>
+			<button type="submit" class="btn btn-info">Update</button>
+			<a href="/task/<#noescape>${task.id}</#noescape>/edit/stories" class="btn btn-success">Next</a>
 		</form>
 		</#escape>
 	</div>

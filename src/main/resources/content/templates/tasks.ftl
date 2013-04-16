@@ -3,8 +3,8 @@
 <@c.page title="Planning Poker">
 
 <div class="row">
-	<h1>Tasks</h1>
 	<div class="span12">
+	<legend>Tasks</legend>
 		<table class="table table-condensed table-hover">
 			<#list tasks as task>
 			<tr>
@@ -13,7 +13,7 @@
 					<a href="/summary/<#noescape>${task.id}</#noescape>" class="btn btn-mini btn-info">Summary</a>
 				</td>
 				<td>
-					<a href="/task/<#noescape>${task.id}</#noescape>/edit/info/">${task.name}</a>
+					<a href="/task/<#noescape>${task.id}</#noescape>/edit/info">${task.name}</a>
 				</td>
 				<td>
 					<a class="btn btn-danger btn-mini pull-right" href="/task/<#noescape>${task.id}</#noescape>/delete/"><i class="icon-trash"></i> Delete</a>
@@ -22,10 +22,12 @@
 			
 			<tr>
 				<td colspan="3">
+				<#if task.isPublished()>
 					<#list task.users as user>
 						<a class="btn btn-primary btn-mini" href="/poker/<#noescape>${task.id}</#noescape>/<#noescape>${user.id}</#noescape>"><i class="icon-play icon-black"></i>&nbsp;&nbsp;${user.name}</a>
 					</#list>
 				</td>
+				</#if>
 			</tr>
 			
 			<tr><td colspan="3">&nbsp;</td></tr>

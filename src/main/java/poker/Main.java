@@ -107,7 +107,9 @@ public class Main {
 
 				/* Create a data-model */
 				Map<String, Object> root = new HashMap<String, Object>();
-				return render("task_new.ftl", cfg, root);
+				root.put("task", new Task("",""));
+				root.put("edit", false);
+				return render("task_info.ftl", cfg, root);
 			}
 
 		});
@@ -118,7 +120,7 @@ public class Main {
 			public Object handle(Request request, Response response) {
 
 				int id = dm.insertTask(new Task(request.queryParams("task_name"), request
-						.queryParams("taskd_escription")));
+						.queryParams("task_description")));
 				dm.createFibonacciEstimations(id);
 
 				response.redirect("/task/" + id + "/edit/estimations");
@@ -130,8 +132,32 @@ public class Main {
 
 			@Override
 			public Object handle(Request request, Response response) {
-				return "Here we should actually render the same as /tasks/new and allow edit of task with id "
-						+ request.params(":id");
+				int task_id = Integer.parseInt(request.params(":id"));
+				Map<String, Object> root = new HashMap<String, Object>();
+				root.put("task", dm.getTask(task_id));
+				root.put("edit", true);
+				
+				return render("task_info.ftl", cfg, root);
+			}
+
+		});
+		
+		post(new Route("/task/:id/edit/info") {
+
+			@Override
+			public Object handle(Request request, Response response) {
+				int task_id = Integer.parseInt(request.params(":id"));
+				Task t = dm.getTask(task_id);
+				String name = request.queryParams("task_name");
+				String desc = request.queryParams("task_description");
+				
+				t.setName(name);
+				t.setDescription(desc);
+				
+				dm.setTask(t);
+				
+				response.redirect(String.format("/task/%d/edit/info", task_id));
+				return null;
 			}
 
 		});
@@ -155,11 +181,6 @@ public class Main {
 
 			@Override
 			public Object handle(Request request, Response response) {
-
-				// insert operation krävs!!!!
-				// dm.insertEstimate(new
-				// Estimate(Integer.parse(request.queryParams("taskid")),
-				// complexity_symbol, unit, unit_value))
 				int task_id = Integer.parseInt(request.params(":id"));
 				
 				int unit = 1;
@@ -176,7 +197,8 @@ public class Main {
 					} catch (NullPointerException | NumberFormatException e) {
 						// no new (or strange) value, let's happily skip it!
 					}
-					
+
+					// we still need to set the new unit type on all estimations!
 					estimate.setUnit(UnitType.values()[unit-1]);
 					dm.setEstimate(estimate);
 				}
@@ -193,7 +215,12 @@ public class Main {
 
 				/* Create a data-model */
 				Map<String, Object> root = new HashMap<String, Object>();
-				root.put("task", dm.getTask(Integer.parseInt(request.params("id"))));
+				int task_id = Integer.parseInt(request.params("id"));
+				Task t = dm.getTask(task_id);
+				root.put("task", t);
+				root.put("stories", dm.getStoriesFromTask(task_id));
+				root.put("published", t.getPublishedAt() != null);
+				
 				return render("task_stories.ftl", cfg, root);
 			}
 
@@ -204,11 +231,65 @@ public class Main {
 			@Override
 			public Object handle(Request request, Response response) {
 
-				// insert operation krävs!!!!
 				response.redirect("/index");
 				return null;
 			}
 
+		});
+		
+		get(new Route("/task/:task_id/story/:story_id/delete") {
+			@Override
+			public Object handle(Request request, Response response) {
+
+				int task_id = Integer.parseInt(request.params(":task_id"));
+				int story_id = Integer.parseInt(request.params(":story_id"));
+				
+				dm.deleteStory(story_id);
+				
+				response.redirect(String.format("/task/%d/edit/stories", task_id));
+				return null;
+			}
+		});
+		
+		post(new Route("/task/:id/story/add") {
+			@Override
+			public Object handle(Request request, Response response) {
+				System.out.println("Adding story");
+				int task_id = Integer.parseInt(request.params(":id"));
+				String story_name = request.queryParams("story_name");
+				String story_desc = request.queryParams("story_description");
+				
+				dm.insertStory(new Story(task_id,story_name,story_desc));
+				
+				response.redirect(String.format("/task/%d/edit/stories", task_id));
+				return null;
+			}
+		});
+		
+		post(new Route("/task/:id/publish") {
+			@Override
+			public Object handle(Request request, Response response) {
+				int task_id = Integer.parseInt(request.params(":id"));
+				Task t = dm.getTask(task_id);
+				t.setPublishedAt(new java.sql.Date(new java.util.Date().getTime()));
+				dm.setTask(t);
+				
+				response.redirect("/");
+				return null;
+			}
+		});
+		
+		post(new Route("/task/:id/unpublish") {
+			@Override
+			public Object handle(Request request, Response response) {
+				int task_id = Integer.parseInt(request.params(":id"));
+				Task t = dm.getTask(task_id);
+				t.setPublishedAt(null);
+				dm.setTask(t);
+				
+				response.redirect("/");
+				return null;
+			}
 		});
 
 		get(new Route("/task/:id/summary") {

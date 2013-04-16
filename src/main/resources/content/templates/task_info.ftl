@@ -3,6 +3,20 @@
 <@c.page title="Planning Poker">
 
 <div class="row">
+
+	<ul class="breadcrumb">
+	<#if !edit>
+		<li><a href="#">New task</a></li>
+	<#else>
+		<li class="active">Info <span class="divider">/</span></li>
+		<li><a href="/task/${task.id}/edit/estimations">Estimations</a> <span class="divider">/</span></li>
+		<li><a href="/task/${task.id}/edit/stories">Stories</a></li>
+	</#if>
+	</ul>
+
+</div>
+
+<div class="row">
 	<div class="span12">
 	
 		<#if !edit>
@@ -22,8 +36,8 @@
 					<button type="submit" class="btn btn-primary pull-right">Add Task</button>
 				<#else>
 					<div class="pull-right">
-						<button type="submit" class="btn btn-info">Update</button>
-						<a href="/task/${task.id}/edit/estimations" class="btn btn-success">Next</a>
+						<button type="submit" class="btn btn-info"><i class="icon-hdd icon-white"></i> Update</button>
+						<a href="/task/${task.id}/edit/estimations" class="btn btn-success"><i class="icon-circle-arrow-right icon-white"></i> Next</a>
 					</div>
 				</#if>
 				

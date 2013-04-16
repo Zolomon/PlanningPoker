@@ -287,7 +287,7 @@ public class Main {
 				t.setPublishedAt(null);
 				dm.setTask(t);
 				
-				response.redirect("/");
+				response.redirect(String.format("/task/%d/edit/stories", task_id));
 				return null;
 			}
 		});

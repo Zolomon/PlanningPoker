@@ -2,34 +2,45 @@
 
 <@c.page title="Planning Poker">
 
-<#assign x = "">
-<#escape x as x?html>
+
 <div class="row">
-	<h1>Stories</h1>
-	<div class="span12">
-		<table class="table table-condensed table-hover span12">
+	<div class="span2">
+		<table class="table table-condensed table-hover">
+			<tr><td>&nbsp;</td></tr>
 			<#list stories as story>
 				<tr>
-					<td><a href="#" id="story-<#noescape>${story.id}</#noescape>" rel="popover">${story.name}</a></td>
-					<#assign h = story.estimations>
-					<#assign keys = h?keys>
-					<#list keys as key>
-						<td>
-							
-						</td>	
-					</#list>
+					<td style="padding: 9px 9px;"><a href="#" id="story-${story.id}" rel="popover">${story.name}</a></td>
 				</tr>
 			</#list>
-		
+		</table>			
+	</div>
+	<div class="span3">
+		<table class="table table-condensed table-hover">
+			<tr>
+				<#list users as user>
+					<td><a href="#" class="" id="user-${user.id}" rel="popover">${user.name}</a></td>
+				</#list>
+			</tr>
+		</table>			
+	</div>
+	<div class="pull-right">
+		<table class="table table-condensed table-hover">
+		<tr><td>&nbsp;</td></tr>
+		<#list stories as story>
+			<tr>
+				<td>
+					<div class="btn-group" data-toggle="buttons-radio">
+					<#list estimations as estimation>
+						<a href="#" type="button" class="btn btn-primary" id="estimate-${estimation.id}" >${estimation.complexitySymbol}</a>
+					</#list>
+					</div>
+				</td>
+				<td>
+					<button class="btn btn-success" type="button"><i class="icon-ok-sign icon-white"></i>Ready</button>
+				</td>
+			</tr>
+		</#list>
 		</table>
-		<table class="table table-condensed table-hover span3">
-		
-			<#list users as user>
-				<tr><td><a href="#" class= id="user-<#noescape>${user.id}</#noescape>" rel="popover">${user.name}</a></td></tr>
-			</#list>
-		
-		</table>
-			
 	</div>
 </div>
 
@@ -40,11 +51,10 @@
 	<#list stories as story>
 		var img${story.id} = '${story.description}';
 
-		$("#story-<#noescape>${story.id}</#noescape>").popover({ title: 'Story description', content: img${story.id}, placement: 'left', animation: true, trigger:'hover', delay: {show:333, hide:100} });
+		$("#story-${story.id}").popover({ title: 'Story description', content: img${story.id}, placement: 'left', animation: true, trigger:'hover', delay: {show:333, hide:100} });
 	
 	</#list>
 </script>
-</#escape>
 
 
 </@c.page>

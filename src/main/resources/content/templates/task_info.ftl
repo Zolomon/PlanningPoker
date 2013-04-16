@@ -50,7 +50,7 @@
 			<form class="navbar-form" id="user_add" method="post" action="/task/${task.id}/edit/user/create">
 		
 			<fieldset>
-				<legend>Users</legend>
+				<legend>Create a new user</legend>
 				<label>User name</label>
 				<input type="text" name="user_name" placeholder="Enter user name here..." class="input-large pull-left">
 				<button type="submit" action="user_add" class="btn btn-primary inline pull-right"><i class="icon-ok-sign icon-white"></i> <i class="icon-user icon-white"></i> Create new user</button>
@@ -59,7 +59,7 @@
 		
 		<form class="navbar-form" id="user_add" method="post" action="/task/${task.id}/edit/user/add">
 			<fieldset>
-			<legend>Add user</legend>
+			<legend>Add an existing user to this task</legend>
 			<select id="user" name="user" class="pull-left">
 				<#list users as user>
 					<option value="${user.id}">${user.name}</option>			
@@ -69,7 +69,7 @@
 			<br /><br />
 			</fieldset>
 		</form>
-			<legend>Remove users</legend>
+			<legend>Remove users from this task</legend>
 		<table class="table table-condensed table-hover">
 		<thead><tr><th>Users</th></tr></thead>
 			<tr>

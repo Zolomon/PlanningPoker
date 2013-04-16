@@ -250,7 +250,7 @@ public class Main {
 					dm.setEstimate(estimate);
 				}
 				
-				response.redirect("/task/" + task_id + "/edit/stories");
+				response.redirect("/task/" + task_id + "/edit/estimations");
 				return null;
 			}
 
@@ -367,11 +367,29 @@ public class Main {
 				}
 				root.put("stories", storiesFromTask);
 				root.put("users", dm.getUsersFromTask(task_id));
+				root.put("estimations", dm.getEstimationsForTask(task_id));
 
 				return render("poker.ftl", cfg, root);
 			}
 		});
 
+		get(new Route("/ajax") {
+			@Override
+			public Object handle(Request request, Response response) {
+				
+				Map<String, Object> root = new HashMap<String, Object>();
+				return render("ajax.ftl", cfg, root);
+			}
+		});
+		
+		post(new Route("/ajax") {
+			@Override
+			public Object handle(Request request, Response response) {
+			
+				return "Hello World!";
+			}
+		});
+		
 	}
 
 }

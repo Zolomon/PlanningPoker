@@ -17,7 +17,7 @@
 </div>
 
 <div class="row">
-	<div class="span12">
+	<div class="span6 pull-left">
 	
 		<#if !edit>
 			<form class="navbar-form pull-left" method="post" action="/task/new">
@@ -44,7 +44,44 @@
 			</fieldset>
 		</form>
 	</div>
+<#if !edit>
+<#else>
+	<div class="span6 pull-right">
+			<form class="navbar-form" id="user_add" method="post" action="/task/${task.id}/edit/user/create">
+		
+			<fieldset>
+				<legend>Users</legend>
+				<label>User name</label>
+				<input type="text" name="user_name" placeholder="Enter user name here..." class="input-large pull-left">
+				<button type="submit" action="user_add" class="btn btn-primary inline pull-right">Create new user</button>
+			</fieldset>
+		</form>
+		
+		<form class="navbar-form" id="user_add" method="post" action="/task/${task.id}/edit/user/add">
+			<fieldset>
+			<legend>Add user</legend>
+			<select id="users" name="users" class="pull-left">
+				<#list users as user>
+					<option vaule="${user.id}">${user.name}</option>			
+				</#list>
+			</select>
+			<button type="submit" action="user_add" class="btn btn-primary inline pull-right">Add user</button>
+			<br /><br />
+			</fieldset>
+		</form>
+			<legend>Remove users</legend>
+		<table class="table table-condensed table-hover">
+		<thead><tr><th>Users</th></tr></thead>
+			<tr>
+				<#list users as user>
+					<td><a class="btn btn-danger btn-mini pull-right" href="/task/${task.id}/user/${user.id}/remove"><i class="icon-trash icon-white"></i> Remove ${user.name}</a></td>
+				</#list>
+			</tr>
+		</table>
+	</div>
+</#if>
 </div>
+
 
 
 </@c.page>

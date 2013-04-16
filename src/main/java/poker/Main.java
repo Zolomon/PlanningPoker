@@ -123,7 +123,7 @@ public class Main {
 						.queryParams("task_description")));
 				dm.createFibonacciEstimations(id);
 
-				response.redirect("/task/" + id + "/edit/estimations");
+				response.redirect("/task/" + id + "/edit/info");
 				return null;
 			}
 		});
@@ -135,6 +135,7 @@ public class Main {
 				int task_id = Integer.parseInt(request.params(":id"));
 				Map<String, Object> root = new HashMap<String, Object>();
 				root.put("task", dm.getTask(task_id));
+				root.put("users", dm.getUsersFromTask(task_id));
 				root.put("edit", true);
 				
 				return render("task_info.ftl", cfg, root);

@@ -60,9 +60,9 @@
 		<form class="navbar-form" id="user_add" method="post" action="/task/${task.id}/edit/user/add">
 			<fieldset>
 			<legend>Add user</legend>
-			<select id="users" name="users" class="pull-left">
+			<select id="user" name="user" class="pull-left">
 				<#list users as user>
-					<option vaule="${user.id}">${user.name}</option>			
+					<option value="${user.id}">${user.name}</option>			
 				</#list>
 			</select>
 			<button type="submit" action="user_add" class="btn btn-primary inline pull-right">Add user</button>
@@ -73,8 +73,8 @@
 		<table class="table table-condensed table-hover">
 		<thead><tr><th>Users</th></tr></thead>
 			<tr>
-				<#list users as user>
-					<td><a class="btn btn-danger btn-mini pull-right" href="/task/${task.id}/user/${user.id}/remove"><i class="icon-trash icon-white"></i> Remove ${user.name}</a></td>
+				<#list task_users as user>
+					<td><a class="btn btn-danger btn-mini pull-right" href="/task/${task.id}/edit/user/${user.id}/remove"><i class="icon-trash icon-white"></i> Remove ${user.name}</a></td>
 				</#list>
 			</tr>
 		</table>

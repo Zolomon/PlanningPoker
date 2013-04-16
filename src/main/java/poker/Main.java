@@ -18,6 +18,7 @@ import poker.entities.Estimate;
 import poker.entities.Story;
 import poker.entities.Task;
 import poker.entities.UnitType;
+import poker.entities.User;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -135,7 +136,8 @@ public class Main {
 				int task_id = Integer.parseInt(request.params(":id"));
 				Map<String, Object> root = new HashMap<String, Object>();
 				root.put("task", dm.getTask(task_id));
-				root.put("users", dm.getUsersFromTask(task_id));
+				root.put("users", dm.getUsers());
+				root.put("task_users", dm.getUsersFromTask(task_id));
 				root.put("edit", true);
 				
 				return render("task_info.ftl", cfg, root);
@@ -162,6 +164,50 @@ public class Main {
 			}
 
 		});
+		
+		post(new Route("/task/:id/edit/user/create") {
+			@Override
+			public Object handle(Request request, Response response) {
+
+				int task_id = Integer.parseInt(request.params(":id"));
+				
+				String name = request.queryParams("user_name");
+				User user = new User(name);
+				dm.insertUser(user);				
+				
+				response.redirect(String.format("/task/%d/edit/info", task_id));
+				return null;
+			}
+		});
+		
+		post(new Route("/task/:id/edit/user/add") {
+			@Override
+			public Object handle(Request request, Response response) {
+
+				int task_id = Integer.parseInt(request.params(":id"));
+				
+				int user_id = Integer.parseInt(request.queryParams("user"));
+				dm.addUserToTask(task_id, user_id);
+				
+				response.redirect(String.format("/task/%d/edit/info", task_id));
+				return null;
+			}
+		});
+		
+		get(new Route("/task/:id/edit/user/:user_id/remove") {
+			@Override
+			public Object handle(Request request, Response response) {
+
+				int task_id = Integer.parseInt(request.params(":id"));
+				
+				int user_id = Integer.parseInt(request.params(":user_id"));
+				dm.deleteUserFromTask(task_id, user_id);
+				
+				response.redirect(String.format("/task/%d/edit/info", task_id));
+				return null;
+			}
+		});
+
 
 		get(new Route("/task/:id/edit/estimations") {
 

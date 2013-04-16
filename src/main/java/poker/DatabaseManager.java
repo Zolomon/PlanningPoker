@@ -828,7 +828,6 @@ public class DatabaseManager {
 		}
 
 		return tasks;
-
 	}
 
 	private int getLatestTask() {
@@ -948,4 +947,27 @@ public class DatabaseManager {
 	//
 	// return estimations;
 	// }
+
+	public List<User> getUsers() {
+		List<User> users = new ArrayList<User>();
+		try {
+			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+
+			PreparedStatement ps = connection.prepareStatement("SELECT id from users ORDER BY id ASC");
+
+			debug("Getting all users");
+
+			ResultSet res = ps.executeQuery();
+			while (res.next()) {
+				users.add(getUser(res.getInt("id")));
+			}
+			connection.close();
+			connection = null;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return users;
+	}
 }

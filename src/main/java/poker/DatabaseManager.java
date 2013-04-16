@@ -102,7 +102,7 @@ public class DatabaseManager {
 				// same integer values
 				+ "unit integer DEFAULT 1, "
 				// the value of this complexity in its unit
-				+ "unit_value integer " + ")");
+				+ "unit_value REAL " + ")");
 
 		// This table will store the individual users
 		statement.execute("drop table if exists users");
@@ -176,20 +176,20 @@ public class DatabaseManager {
 		}
 	}
 
-	private void createFibonacciEstimations(int task_id) throws SQLException {
-		insertEstimate(new Estimate(task_id, "0", UnitType.PERSON_DAYS, 0));
-		insertEstimate(new Estimate(task_id, "½", UnitType.PERSON_DAYS, 0.5f));
-		insertEstimate(new Estimate(task_id, "1", UnitType.PERSON_DAYS, 1f));
-		insertEstimate(new Estimate(task_id, "2", UnitType.PERSON_DAYS, 2f));
-		insertEstimate(new Estimate(task_id, "3", UnitType.PERSON_DAYS, 3f));
-		insertEstimate(new Estimate(task_id, "5", UnitType.PERSON_DAYS, 5f));
-		insertEstimate(new Estimate(task_id, "8", UnitType.PERSON_DAYS, 8f));
-		insertEstimate(new Estimate(task_id, "13", UnitType.PERSON_DAYS, 13f));
-		insertEstimate(new Estimate(task_id, "20", UnitType.PERSON_DAYS, 20f));
-		insertEstimate(new Estimate(task_id, "40", UnitType.PERSON_DAYS, 40f));
-		insertEstimate(new Estimate(task_id, "100", UnitType.PERSON_DAYS, 100f));
-		insertEstimate(new Estimate(task_id, "?", UnitType.PERSON_DAYS, -1));
-		insertEstimate(new Estimate(task_id, "coffee", UnitType.PERSON_DAYS, -1));
+	public void createFibonacciEstimations(int task_id) {
+			insertEstimate(new Estimate(task_id, "0", UnitType.PERSON_DAYS, 0));
+			insertEstimate(new Estimate(task_id, "1/2", UnitType.PERSON_DAYS, 0.5f));
+			insertEstimate(new Estimate(task_id, "1", UnitType.PERSON_DAYS, 1f));
+			insertEstimate(new Estimate(task_id, "2", UnitType.PERSON_DAYS, 2f));
+			insertEstimate(new Estimate(task_id, "3", UnitType.PERSON_DAYS, 3f));
+			insertEstimate(new Estimate(task_id, "5", UnitType.PERSON_DAYS, 5f));
+			insertEstimate(new Estimate(task_id, "8", UnitType.PERSON_DAYS, 8f));
+			insertEstimate(new Estimate(task_id, "13", UnitType.PERSON_DAYS, 13f));
+			insertEstimate(new Estimate(task_id, "20", UnitType.PERSON_DAYS, 20f));
+			insertEstimate(new Estimate(task_id, "40", UnitType.PERSON_DAYS, 40f));
+			insertEstimate(new Estimate(task_id, "100", UnitType.PERSON_DAYS, 100f));
+			insertEstimate(new Estimate(task_id, "?", UnitType.PERSON_DAYS, -1));
+			insertEstimate(new Estimate(task_id, "coffee", UnitType.PERSON_DAYS, -1));
 	}
 
 	public Task getTask(int id) {
@@ -537,10 +537,10 @@ public class DatabaseManager {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 			PreparedStatement ps = connection
 					.prepareStatement("INSERT into estimations (task_id, complexity_symbol, unit, unit_value) values (?,?,?,?)");
-			ps.setInt(2, estimate.getTaskId());
-			ps.setString(1, estimate.getComplexitySymbol());
-			ps.setInt(2, estimate.getUnit().getCode());
-			ps.setFloat(3, estimate.getUnitValue());
+			ps.setInt(1, estimate.getTaskId());
+			ps.setString(2, estimate.getComplexitySymbol());
+			ps.setInt(3, estimate.getUnit().getCode());
+			ps.setFloat(4, estimate.getUnitValue());
 
 			debug("Inserting estimate: " + estimate.toString());
 
@@ -655,7 +655,7 @@ public class DatabaseManager {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
 			PreparedStatement ps = connection
-					.prepareStatement("SELECT estimations.id, estimations.task_id, estimations.complexity_symbol, estimations.unit, estimations.unit_value FROM estimations join story_user_estimations on story_user_estimations.estimation_id=estimations_id where user_id=?");
+					.prepareStatement("SELECT estimations.id, estimations.task_id, estimations.complexity_symbol, estimations.unit, estimations.unit_value FROM estimations join story_user_estimations on story_user_estimations.estimation_id=estimations.id where user_id=?");
 			ps.setInt(1, user_id);
 
 			Estimate estimate = null;
@@ -758,7 +758,7 @@ public class DatabaseManager {
 					.prepareStatement("SELECT id, task_id, complexity_symbol, unit, unit_value from estimations where task_id = ? ");
 			ps.setInt(1, task_id);
 
-			debug("Fetching estimate with id: " + task_id);
+			debug("Fetching estimations for task with id: " + task_id);
 
 			Estimate estimate = null;
 
@@ -766,7 +766,7 @@ public class DatabaseManager {
 
 			while (res.next()) {
 				estimate = new Estimate(res.getInt("id"), res.getInt("task_id"), res.getString("complexity_symbol"),
-						UnitType.values()[res.getInt("unit")], res.getInt("unit_value"));
+						UnitType.values()[res.getInt("unit")-1], res.getInt("unit_value"));
 				debug("Fetching estimate: " + estimate.toString());
 				estimations.add(estimate);
 			}
@@ -881,4 +881,37 @@ public class DatabaseManager {
 
 		return id;
 	}
+	//
+	// public List<Estimate> getLatestEstimatesForStory(int story_id) {
+	// List<Estimate> estimations = new ArrayList<Estimate>();
+	// try {
+	// connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+	//
+	// PreparedStatement ps = connection
+	// .prepareStatement("SELECT id, task_id, complexity_symbol, unit, unit_value FROM estimations as e "
+	// +
+	// "JOIN story_user_estimations as s ON s.task_id = e.task_id AND s. WHERE s.story_id = ? ");
+	// ps.setInt(1, story_id);
+	//
+	// debug("Fetching latest estimates for story with id: " + task_id);
+	//
+	// Estimate estimate = null;
+	//
+	// ResultSet res = ps.executeQuery();
+	//
+	// while (res.next()) {
+	// estimate = new Estimate(res.getInt("id"), res.getInt("task_id"),
+	// res.getString("complexity_symbol"),
+	// UnitType.values()[res.getInt("unit")], res.getInt("unit_value"));
+	// debug("Fetching estimate: " + estimate.toString());
+	// estimations.add(estimate);
+	// }
+	//
+	// connection.close();
+	// } catch (SQLException e) {
+	// e.printStackTrace();
+	// }
+	//
+	// return estimations;
+	// }
 }

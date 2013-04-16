@@ -1,5 +1,8 @@
 package poker.entities;
 
+import java.util.HashMap;
+import java.util.List;
+
 public class Story {
 	private int		id;
 	private int		task_id;
@@ -7,6 +10,7 @@ public class Story {
 	private String	description;
 	private int		consensus;
 	private int		iteration;
+	private HashMap<User, List<Estimate>> estimations;
 
 	/***
 	 * Constructor for new Story
@@ -94,5 +98,13 @@ public class Story {
 		return "[" + getId() + ", " + getTaskId() + ", " + getName() + ", "
 				+ getDescription() + ", " + getConsensus() + ", "
 				+ getIteration() + "]";
+	}
+
+	public HashMap<User, List<Estimate>> getEstimations() {
+		return estimations;
+	}
+
+	public void setEstimations(HashMap<User, List<Estimate>> estimations) {
+		this.estimations = estimations;
 	}
 }

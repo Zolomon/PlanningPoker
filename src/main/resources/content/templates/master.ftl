@@ -34,10 +34,10 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="brand" href="#">Planning Poker</a>
+          <a class="brand" href="/">Planning Poker</a>
           <div class="nav-collapse collapse">
             <ul class="nav">
-              <li class="active"><a href="#">Tasks</a></li>
+              <li class="active"><a href="/">Tasks</a></li>
               <li><a href="#about">Your Story</a></li>
               <li><a href="https://github.com/Zolomon/PlanningPoker/">GitHub</a></li>
             </ul>

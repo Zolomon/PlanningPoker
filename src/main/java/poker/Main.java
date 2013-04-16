@@ -10,6 +10,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.ProcessBuilder.Redirect;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,7 @@ public class Main {
 
 			/* Get or create a template */
 			Template temp = cfg.getTemplate(filename);
-			
+
 			/* Merge data-model with template */
 
 			Writer out = new StringWriter();
@@ -362,12 +363,15 @@ public class Main {
 				Map<String, Object> root = new HashMap<String, Object>();
 				int task_id = Integer.parseInt(request.params(":task_id"));
 				List<Story> storiesFromTask = dm.getStoriesFromTask(task_id);
+				List<HashMap<User, List<Estimate>>> story_estimations = new ArrayList<HashMap<User, List<Estimate>>>();
 				for (Story s : storiesFromTask) {
 					s.setEstimations(dm.getEstimatesFromStory(s.getId()));
+					story_estimations.add(dm.getEstimatesFromStory(s.getId()));
 				}
 				root.put("stories", storiesFromTask);
 				root.put("users", dm.getUsersFromTask(task_id));
 				root.put("estimations", dm.getEstimationsForTask(task_id));
+				root.put("story_estimations", story_estimations);
 
 				return render("poker.ftl", cfg, root);
 			}
@@ -391,5 +395,4 @@ public class Main {
 		});
 		
 	}
-
 }

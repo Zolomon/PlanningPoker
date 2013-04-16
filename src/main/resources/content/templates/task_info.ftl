@@ -53,7 +53,7 @@
 				<legend>Users</legend>
 				<label>User name</label>
 				<input type="text" name="user_name" placeholder="Enter user name here..." class="input-large pull-left">
-				<button type="submit" action="user_add" class="btn btn-primary inline pull-right">Create new user</button>
+				<button type="submit" action="user_add" class="btn btn-primary inline pull-right"><i class="icon-ok-sign icon-white"></i> <i class="icon-user icon-white"></i> Create new user</button>
 			</fieldset>
 		</form>
 		
@@ -65,7 +65,7 @@
 					<option value="${user.id}">${user.name}</option>			
 				</#list>
 			</select>
-			<button type="submit" action="user_add" class="btn btn-primary inline pull-right">Add user</button>
+			<button type="submit" action="user_add" class="btn btn-primary inline pull-right"><i class="icon-plus-sign icon-white"></i> <i class="icon-user icon-white"></i> Add user</button>
 			<br /><br />
 			</fieldset>
 		</form>
@@ -74,7 +74,7 @@
 		<thead><tr><th>Users</th></tr></thead>
 			<tr>
 				<#list task_users as user>
-					<td><a class="btn btn-danger btn-mini pull-right" href="/task/${task.id}/edit/user/${user.id}/remove"><i class="icon-trash icon-white"></i> Remove ${user.name}</a></td>
+					<td><a class="btn btn-danger btn-mini pull-right" href="/task/${task.id}/edit/user/${user.id}/remove"><i class="icon-minus-sign icon-white"></i> Remove ${user.name}</a></td>
 				</#list>
 			</tr>
 		</table>

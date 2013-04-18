@@ -393,7 +393,7 @@ public class Main {
 				List<UserEstimate> estimations = dm.getLatestEstimatesForStory(story_id);
 				
 				StringBuilder sb = new StringBuilder();
-				
+				sb.append("data...");
 				for (UserEstimate userEstimate : estimations) {
 				
 					sb.append(userEstimate.getEstimate().getComplexitySymbol());

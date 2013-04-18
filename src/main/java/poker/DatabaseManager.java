@@ -925,7 +925,7 @@ public class DatabaseManager {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
 			PreparedStatement ps = connection
-					.prepareStatement("select e.id as 'estimate_id', u.id as 'user_id' from estimations e"
+					.prepareStatement("select e.id as 'estimate_id', u.id as 'user_id' from estimations e "
 							+ "left join story_user_estimations sue on e.id=sue.estimation_id "
 							+ "left join stories s on sue.story_id=s.id " + "left join users u on sue.user_id=u.id " +
 

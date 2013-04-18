@@ -13,13 +13,13 @@
 						<form style="margin: 0;" id="storyform-${story.id}">
 							<div class="btn-group" data-toggle="buttons-radio">
 								<#list estimations as estimation>
-									<button type="button" class="btn btn-primary" id="estimate-${estimation.id}" value="${estimation.id}">${estimation.complexitySymbol}</button>
+									<button type="button" class="btn btn-primary" id="story-${story.id}-estimate-${estimation.id}" value="${estimation.id}">${estimation.complexitySymbol}</button>
 								</#list>
 							</div>
 						</form>
 					</td>
 					<td>
-						<button class="btn btn-success" id="ready-${story.id}" type="button"><i class="icon-ok-sign icon-white"></i>Ready</button>
+						<button class="btn btn-success disabled" id="ready-${story.id}" type="button"><i class="icon-ok-sign icon-white"></i>Ready</button>
 					</td>
 				</tr>
 			</#list>
@@ -53,6 +53,18 @@
 		
 		$("#story-${story.id}").popover({ title: 'Story description', content: img${story.id}, placement: 'left', animation: true, trigger:'hover', delay: {show:333, hide:100} });
 		
+		<#list estimations as estimation>
+			$("#story-${story.id}-estimate-${estimation.id}").click(function() {
+				if($("#story-${story.id}-estimate-${estimation.id}").hasClass("active")) {
+					$("#story-${story.id}-estimate-${estimation.id}").removeClass("active");
+					$("#ready-${story.id}").addClass("disabled");
+				} else if (!$("#story-${story.id}-estimate-${estimation.id}").hasClass("active")) {
+					$("#story-${story.id}-estimate-${estimation.id}").addClass("active");
+					$("#ready-${story.id}").removeClass("disabled");
+				}				
+			});
+		</#list>
+		
 		$("#ready-${story.id}").click(function() {
 			// Abort any pending request
 			if (request${story.id}) {
@@ -64,6 +76,9 @@
 			
 			// let's select and cache all the fields
 			var $inputs = $form.find("button.active");
+			if (!($inputs.length > 0)) {
+				return;
+			}
 			alert($inputs.attr('value'));
 			
 			// serialize the data in the form
@@ -73,9 +88,21 @@
 			$inputs.prop("disabled", true);
 			
 			// fire off the request
-			$.post("/task/${task.id}/user/${user.id}/story/${story.id}/ready", {'estimate_id': $inputs.attr('value')}); 
+			$.post("/task/${task.id}/user/${user.id}/story/${story.id}/ready", {'estimate_id': $inputs.attr('value')})
+			.done(function(data) {
+				$inputs.prop("disabled", false);
+				$inputs.removeClass("active");
+				alert(data);
+			});
+			 
 		});
 		
+		setInterval(function() {
+			$.get("/task/${task.id}/user/${user.id}/story/${story.id}", function(data) {
+				console.log(data);
+				$("#story-estimations-${story.id}").html(data);
+			});
+		}, 3000);
 	</#list>
 </script>
 

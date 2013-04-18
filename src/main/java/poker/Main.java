@@ -20,6 +20,7 @@ import poker.entities.Story;
 import poker.entities.Task;
 import poker.entities.UnitType;
 import poker.entities.User;
+import poker.entities.UserEstimate;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -362,14 +363,17 @@ public class Main {
 
 				Map<String, Object> root = new HashMap<String, Object>();
 				int task_id = Integer.parseInt(request.params(":task_id"));
+				int user_id = Integer.parseInt(request.params(":user_id"));
 				List<Story> storiesFromTask = dm.getStoriesFromTask(task_id);
 				List<HashMap<User, List<Estimate>>> story_estimations = new ArrayList<HashMap<User, List<Estimate>>>();
 				for (Story s : storiesFromTask) {
 					s.setEstimations(dm.getEstimatesFromStory(s.getId()));
 					story_estimations.add(dm.getEstimatesFromStory(s.getId()));
 				}
+				root.put("task", dm.getTask(task_id));
 				root.put("stories", storiesFromTask);
 				root.put("users", dm.getUsersFromTask(task_id));
+				root.put("user", dm.getUser(user_id));
 				root.put("estimations", dm.getEstimationsForTask(task_id));
 				root.put("story_estimations", story_estimations);
 
@@ -377,20 +381,41 @@ public class Main {
 			}
 		});
 
-		get(new Route("/ajax") {
+		get(new Route("/task/:task_id/user/:user_id/story/:story_id") {
 			@Override
 			public Object handle(Request request, Response response) {
 				
-				Map<String, Object> root = new HashMap<String, Object>();
-				return render("ajax.ftl", cfg, root);
+				int task_id = Integer.parseInt(request.params(":task_id"));
+				int user_id = Integer.parseInt(request.params(":user_id"));
+				int story_id = Integer.parseInt(request.params(":story_id"));
+				
+				// TODO: Calculate consensus divergence and colour code differences
+				List<UserEstimate> estimations = dm.getLatestEstimatesForStory(story_id);
+				
+				StringBuilder sb = new StringBuilder();
+				
+				for (UserEstimate userEstimate : estimations) {
+				
+					sb.append(userEstimate.getEstimate().getComplexitySymbol());
+					sb.append(" ");
+				}
+				
+				return sb.toString();
 			}
 		});
 		
-		post(new Route("/ajax") {
+		post(new Route("/task/:task_id/user/:user_id/story/:story_id/ready") {
 			@Override
 			public Object handle(Request request, Response response) {
-			
-				return "Hello World!";
+				
+				int task_id = Integer.parseInt(request.params(":task_id"));
+				int user_id = Integer.parseInt(request.params(":user_id"));
+				int story_id = Integer.parseInt(request.params(":story_id"));
+				int estimate_id = Integer.parseInt(request.queryParams("estimate_id"));
+				
+				dm.addEstimateToStory(story_id, user_id, estimate_id);
+				
+				return "1";
 			}
 		});
 		

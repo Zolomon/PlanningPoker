@@ -15,6 +15,10 @@
 				</td>
 				<td>
 					<a href="/task/<#noescape>${task.id}</#noescape>/edit/info">${task.name}</a>
+					
+					<#if !task.isPublished()>
+						<small>(unpublished)</small>
+					</#if>
 				</td>
 				<td>
 					<a class="btn btn-danger btn-mini pull-right" href="/task/<#noescape>${task.id}</#noescape>/delete/"><i class="icon-trash icon-white"></i> Delete</a>

@@ -24,6 +24,7 @@ import poker.entities.Story;
 import poker.entities.Task;
 import poker.entities.UnitType;
 import poker.entities.User;
+import poker.entities.UserEstimate;
 
 public class DatabaseManager {
 	private static final String	JDBC_SQLITE_POKER_DB	= "jdbc:sqlite:poker.db";
@@ -172,6 +173,10 @@ public class DatabaseManager {
 
 			addUserToTask(2, 4);
 			addUserToTask(2, 5);
+
+			addEstimateToStory(1, 1, 4);
+			addEstimateToStory(1, 2, 4);
+			addEstimateToStory(1, 2, 3);
 		}
 	}
 
@@ -913,40 +918,42 @@ public class DatabaseManager {
 
 		return id;
 	}
-	//
-	// public List<Estimate> getLatestEstimatesForStory(int story_id) {
-	// List<Estimate> estimations = new ArrayList<Estimate>();
-	// try {
-	// Connection connection =
-	// DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
-	//
-	// PreparedStatement ps = connection
-	// .prepareStatement("SELECT id, task_id, complexity_symbol, unit, unit_value FROM estimations as e "
-	// +
-	// "JOIN story_user_estimations as s ON s.task_id = e.task_id AND s. WHERE s.story_id = ? ");
-	// ps.setInt(1, story_id);
-	//
-	// debug("Fetching latest estimates for story with id: " + task_id);
-	//
-	// Estimate estimate = null;
-	//
-	// ResultSet res = ps.executeQuery();
-	//
-	// while (res.next()) {
-	// estimate = new Estimate(res.getInt("id"), res.getInt("task_id"),
-	// res.getString("complexity_symbol"),
-	// UnitType.values()[res.getInt("unit")], res.getInt("unit_value"));
-	// debug("Fetching estimate: " + estimate.toString());
-	// estimations.add(estimate);
-	// }
-	//
-	// connection.close();connection=null;
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// }
-	//
-	// return estimations;
-	// }
+
+	public List<UserEstimate> getLatestEstimatesForStory(int story_id) {
+		List<UserEstimate> estimations = new ArrayList<UserEstimate>();
+		try {
+			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+
+			PreparedStatement ps = connection
+					.prepareStatement("select e.id as 'estimate_id', u.id as 'user_id' from estimations e"
+							+ "left join story_user_estimations sue on e.id=sue.estimation_id "
+							+ "left join stories s on sue.story_id=s.id " + "left join users u on sue.user_id=u.id " +
+
+							"where s.iteration=sue.story_iteration and s.id=?");
+			ps.setInt(1, story_id);
+
+			debug("Fetching latest estimates for story with id: " + story_id);
+
+			Estimate estimate = null;
+			User user = null;
+			
+			ResultSet res = ps.executeQuery();
+
+			while (res.next()) {
+				estimate = getEstimate(res.getInt("estimate_id"));
+				user = getUser(res.getInt("user_id"));
+				
+				estimations.add(new UserEstimate(user, estimate));
+			}
+
+			connection.close();
+			connection = null;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return estimations;
+	}
 
 	public List<User> getUsers() {
 		List<User> users = new ArrayList<User>();

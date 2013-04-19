@@ -174,9 +174,9 @@ public class DatabaseManager {
 			addUserToTask(2, 4);
 			addUserToTask(2, 5);
 
-			addEstimateToStory(1, 1, 4);
-			addEstimateToStory(1, 2, 4);
-			addEstimateToStory(1, 2, 3);
+//			addEstimateToStory(1, 1, 4);
+//			addEstimateToStory(1, 2, 4);
+//			addEstimateToStory(1, 2, 3);
 		}
 	}
 
@@ -682,7 +682,8 @@ public class DatabaseManager {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
 			PreparedStatement ps = connection
-					.prepareStatement("SELECT estimations.id, estimations.task_id, estimations.complexity_symbol, estimations.unit, estimations.unit_value FROM estimations join story_user_estimations on story_user_estimations.estimation_id=estimations.id where user_id=?");
+					.prepareStatement("SELECT estimations.id, estimations.task_id, estimations.complexity_symbol, estimations.unit, "
+							+ "estimations.unit_value FROM estimations join story_user_estimations on story_user_estimations.estimation_id=estimations.id where user_id=?");
 			ps.setInt(1, user_id);
 
 			Estimate estimate = null;
@@ -765,10 +766,11 @@ public class DatabaseManager {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
 			PreparedStatement ps = connection
-					.prepareStatement("INSERT INTO story_user_estimations (story_id, user_id, estimation_id) VALUES (?,?,?)");
+					.prepareStatement("INSERT INTO story_user_estimations (story_id, user_id, estimation_id, story_iteration) VALUES (?,?,?,?)");
 			ps.setInt(1, story_id);
 			ps.setInt(2, user_id);
 			ps.setInt(3, estimate_id);
+			ps.setInt(4, getStory(story_id).getIteration());
 
 			debug("Adding estimate [" + estimate_id + "] to story [" + story_id + "] for user [" + user_id + "]");
 			ps.executeUpdate();
@@ -919,31 +921,20 @@ public class DatabaseManager {
 		return id;
 	}
 
-	public List<UserEstimate> getLatestEstimatesForStory(int story_id) {
-		List<UserEstimate> estimations = new ArrayList<UserEstimate>();
+	public int getLatestIteration(int story_id) {
+		int iteration = -1;
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
-			PreparedStatement ps = connection
-					.prepareStatement("select e.id as 'estimate_id', u.id as 'user_id' from estimations e "
-							+ "left join story_user_estimations sue on e.id=sue.estimation_id "
-							+ "left join stories s on sue.story_id=s.id " + "left join users u on sue.user_id=u.id " +
-
-							"where s.iteration=sue.story_iteration and s.id=?");
+			PreparedStatement ps = connection.prepareStatement("SELECT iteration FROM stories WHERE id=?");
 			ps.setInt(1, story_id);
 
-			debug("Fetching latest estimates for story with id: " + story_id);
+			debug(String.format("Fetching latest iteration for story [%d]", story_id));
 
-			Estimate estimate = null;
-			User user = null;
-			
 			ResultSet res = ps.executeQuery();
 
 			while (res.next()) {
-				estimate = getEstimate(res.getInt("estimate_id"));
-				user = getUser(res.getInt("user_id"));
-				
-				estimations.add(new UserEstimate(user, estimate));
+				iteration = res.getInt("iteration");
 			}
 
 			connection.close();
@@ -952,7 +943,65 @@ public class DatabaseManager {
 			e.printStackTrace();
 		}
 
+		return iteration;
+	}
+
+	public void increaseStoryIteration(int story_id) {
+
+		try {
+			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+
+			PreparedStatement ps = connection
+					.prepareStatement("UPDATE stories SET iteration=((select iteration from stories where id=? order by iteration desc limit 1)+1) where id=?");
+			ps.setInt(1, story_id);
+			ps.setInt(2, story_id);
+
+			debug(String.format("Increasing iteration for story [%d]", story_id));
+
+			ps.executeUpdate();
+
+			connection.close();
+			connection = null;
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
+	}
+
+	public List<UserEstimate> getUserEstimatesForStoryWithIteration(int story_id, int iteration) {
+		List<UserEstimate> estimations = new ArrayList<UserEstimate>();
+		try {
+			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			PreparedStatement ps = connection.prepareStatement("select e.id as 'estimate_id', sue.user_id as 'user_id'"
+					+ "from story_user_estimations sue " + "inner join estimations e on sue.estimation_id=e.id "
+					+ "where sue.story_id=? and sue.story_iteration=? " + "order by sue.user_id asc");
+
+			ps.setInt(1, story_id);
+			ps.setInt(2, iteration);
+
+			debug(String.format("Fetching user estimates from story [%d] with iteration [%d]", story_id, iteration));
+
+			Estimate estimate = null;
+			User user = null;
+
+			ResultSet res = ps.executeQuery();
+
+			while (res.next()) {
+				estimate = getEstimate(res.getInt("estimate_id"));
+				user = getUser(res.getInt("user_id"));
+
+				estimations.add(new UserEstimate(user, estimate));
+			}
+
+			connection.close();
+			connection = null;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return estimations;
+	}
+
+	public List<UserEstimate> getLatestEstimatesForStory(int story_id) {
+		return getUserEstimatesForStoryWithIteration(story_id, getLatestIteration(story_id));
 	}
 
 	public List<User> getUsers() {
@@ -977,4 +1026,6 @@ public class DatabaseManager {
 
 		return users;
 	}
+	
+	
 }

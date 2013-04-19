@@ -390,15 +390,50 @@ public class Main {
 				int story_id = Integer.parseInt(request.params(":story_id"));
 				
 				// TODO: Calculate consensus divergence and colour code differences
-				List<UserEstimate> estimations = dm.getLatestEstimatesForStory(story_id);
+				List<UserEstimate> latestEstimations = dm.getLatestEstimatesForStory(story_id);
+				int iteration = dm.getLatestIteration(story_id);
+				
+				List<UserEstimate> previousEstimations = dm.getUserEstimatesForStoryWithIteration(story_id, iteration > 0 ? iteration - 1 : iteration);
 				
 				StringBuilder sb = new StringBuilder();
-				sb.append("data...");
-				for (UserEstimate userEstimate : estimations) {
 				
-					sb.append(userEstimate.getEstimate().getComplexitySymbol());
-					sb.append(" ");
+				if (latestEstimations.size() == 0) {
+					sb.append("can vote");
+				} else {
+					boolean userFound = false;
+					for(UserEstimate ue : latestEstimations) {
+						if (ue.getUser().getId() == user_id) {
+							userFound = true; 
+						}
+					}
+					if (userFound) {
+						sb.append("can not vote");
+					}
 				}
+				
+				sb.append(";");
+				
+				// Previous iteration
+				if (iteration > 0) {
+					sb.append("<span class=\"label label-info\">");
+					
+					for (UserEstimate userEstimate : previousEstimations) {
+					
+						sb.append(userEstimate.getEstimate().getComplexitySymbol());
+						sb.append(" ");
+					} 
+					sb.append("</span>");
+				}
+				
+				// Next iteration
+				
+				for(UserEstimate ue : latestEstimations) {
+					sb.append("<button class=\"btn btn-info btn-small\">");
+					sb.append(ue.getEstimate().getComplexitySymbol());
+					sb.append("</button>");
+				}
+				
+				
 				
 				return sb.toString();
 			}
@@ -413,8 +448,17 @@ public class Main {
 				int story_id = Integer.parseInt(request.params(":story_id"));
 				int estimate_id = Integer.parseInt(request.queryParams("estimate_id"));
 				
-				dm.addEstimateToStory(story_id, user_id, estimate_id);
-				
+				List<User> usersOnThisTask = dm.getUsersFromTask(task_id);
+				List<UserEstimate> estimatesByUsersThisIteration = dm.getLatestEstimatesForStory(story_id);
+
+				// If everyone has voted, increase iteration
+				if (estimatesByUsersThisIteration.size() == usersOnThisTask.size() - 1) {
+					dm.addEstimateToStory(story_id, user_id, estimate_id);
+					dm.increaseStoryIteration(story_id);
+				} else {
+					dm.addEstimateToStory(story_id, user_id, estimate_id);
+				}
+								
 				return "1";
 			}
 		});

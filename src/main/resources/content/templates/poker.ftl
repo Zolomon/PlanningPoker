@@ -106,30 +106,16 @@
 		});
 		
 		setInterval(function() {
-			$.get("/task/${task.id}/user/${user.id}/story/${story.id}", function(data) {
-				console.log("from get: " + data);
-				var substr = data.split(';');
-				$("#story-estimations-${story.id}").html(substr[1]);
-					if (substr[0] === "can vote") {
-						var $inputs = $("#storyform-${story.id}").find("button");
-						$inputs.prop("disabled", false);
-					}
-				/*if (substr[2] === "done") {
-					//$("#storyform-${story.id}").parent().parent().remove();
-					//$("#story-estimations-${story.id}").html("<span>Done</span>");
-					var $inputs = $("#storyform-${story.id}").find("button");
-						$inputs.prop("disabled", true);
+			$.getJSON("/task/${task.id}/user/${user.id}/story/${story.id}", function(data) {
+				console.log("from get: " + data["vote"]+" "+ data["consensus"]  +" " +data["data"]+);
+								
+				$("#story-estimations-${story.id}").html(data["data"]);
+				
+				if (data["vote"] === "true") {
+					$("#storyform-${story.id}").find("button").prop("disabled", false);
+				} else {
+					$("#storyform-${story.id}").find("button").prop("disabled", true);
 				}
-				else{
-					$("#story-estimations-${story.id}").html(substr[1]);
-					if (substr[0] === "can vote") {
-						var $inputs = $("#storyform-${story.id}").find("button");
-						$inputs.prop("disabled", false);
-					}
-				}*/
-				//if (data === "can vote") {
-				//	$inputs.prop("disabled", false);	
-				//}
 			});
 		}, 500);
 	</#list>

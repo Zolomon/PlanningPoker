@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import poker.entities.Estimate;
 import poker.entities.Story;
@@ -33,15 +34,14 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 public class Main {
-	private static final int NO_CONSENSUS = -1;
-	private static DatabaseManager dm;
+	private static final int		NO_CONSENSUS	= -1;
+	private static DatabaseManager	dm;
 
 	private void debug(String msg) {
 		System.out.println(msg);
 	}
 
-	private static String render(String filename, Configuration cfg,
-			Map<String, Object> root) {
+	private static String render(String filename, Configuration cfg, Map<String, Object> root) {
 		try {
 
 			/* Get or create a template */
@@ -70,8 +70,8 @@ public class Main {
 		final Configuration cfg = new Configuration();
 		try {
 
-			File file = new File(Thread.currentThread().getContextClassLoader()
-					.getResource("content/templates/").toURI());
+			File file = new File(Thread.currentThread().getContextClassLoader().getResource("content/templates/")
+					.toURI());
 
 			cfg.setDirectoryForTemplateLoading(file);
 			cfg.setObjectWrapper(new DefaultObjectWrapper());
@@ -127,8 +127,7 @@ public class Main {
 			@Override
 			public Object handle(Request request, Response response) {
 
-				int id = dm.insertTask(new Task(request
-						.queryParams("task_name"), request
+				int id = dm.insertTask(new Task(request.queryParams("task_name"), request
 						.queryParams("task_description")));
 				dm.createFibonacciEstimations(id);
 
@@ -330,8 +329,7 @@ public class Main {
 			public Object handle(Request request, Response response) {
 				int task_id = Integer.parseInt(request.params(":id"));
 				Task t = dm.getTask(task_id);
-				t.setPublishedAt(new java.sql.Date(new java.util.Date()
-						.getTime()));
+				t.setPublishedAt(new java.sql.Date(new java.util.Date().getTime()));
 				dm.setTask(t);
 
 				response.redirect("/");
@@ -363,9 +361,8 @@ public class Main {
 
 				List<StoryEstimate> stories = new ArrayList<StoryEstimate>();
 				for (Story s : dm.getStoriesFromTask(task_id)) {
-					stories.add(new StoryEstimate(s,
-							(s.getConsensus() == -1 ? 0 : dm.getEstimate(s.getConsensus()).getUnitValue())
-					));
+					stories.add(new StoryEstimate(s, (s.getConsensus() == -1 ? 0 : dm.getEstimate(s.getConsensus())
+							.getUnitValue())));
 				}
 				root.put("stories", stories);
 
@@ -385,9 +382,10 @@ public class Main {
 
 				List<StoryEstimate> stories = new ArrayList<StoryEstimate>();
 				for (Story s : dm.getStoriesFromTask(task_id)) {
-					stories.add(new StoryEstimate(s, s.getConsensus() == -1 ? 0 : dm.getEstimate(s.getConsensus()).getUnitValue()));
+					stories.add(new StoryEstimate(s, s.getConsensus() == -1 ? 0 : dm.getEstimate(s.getConsensus())
+							.getUnitValue()));
 				}
-				
+
 				root.put("stories", stories);
 
 				return render("task_summary.ftl", cfg, root);
@@ -434,17 +432,18 @@ public class Main {
 				List<UserEstimate> previousEstimations = dm.getUserEstimatesForStoryWithIteration(story_id,
 						iteration > 0 ? iteration - 1 : iteration);
 
-				Gson gson = new Gson();
+				Gson gson = new GsonBuilder().create();
 				HashMap<String, String> gmap = new HashMap<String, String>();
-				gmap.put("key1", "value1");
-				gmap.put("key2", "value2");
-				gmap.put("key3", "value3едц\"#¤%&/");
-				System.out.println(gson.toJson(gmap));
+				// gmap.put("key1", "value1");
+				// gmap.put("key2", "value2");
+				// gmap.put("key3", "value3едц\"#¤%&/");
+				// System.out.println(gson.toJson(gmap));
 
-				StringBuilder sb = new StringBuilder();
+				// StringBuilder sb = new StringBuilder();
 
 				if (latestEstimations.size() == 0) {
-					sb.append("can vote");
+					// sb.append("can vote");
+					gmap.put("vote", "true");
 				} else {
 					boolean userFound = false;
 					for (UserEstimate ue : latestEstimations) {
@@ -452,15 +451,19 @@ public class Main {
 							userFound = true;
 						}
 					}
+					
 					if (userFound) {
-						sb.append("can not vote");
+						gmap.put("vote", "false");
+						// sb.append("can not vote");
 					} else {
-						sb.append("can vote");
+						gmap.put("vote", "true");
+						// sb.append("can vote");
 					}
 				}
 
-				sb.append(";");
+				// sb.append(";");
 
+				StringBuilder sb = new StringBuilder();
 				// Previous iteration
 				if (iteration > 0) {
 					sb.append("<span class=\"label label-info\">");
@@ -476,11 +479,13 @@ public class Main {
 				// Next iteration
 
 				boolean consensus = true;
-				ArrayList<Float> values = new ArrayList<Float>();
+				ArrayList<Integer> values = new ArrayList<Integer>();
+
+				for (UserEstimate ue : dm.getUserEstimatesForStoryWithIteration(story_id, iteration - 1)) {
+					values.add(ue.getEstimate().getId());
+				}
 
 				for (UserEstimate ue : latestEstimations) {
-					values.add(ue.getEstimate().getUnitValue());
-
 					sb.append("<button class=\"btn btn-info btn-small\">");
 					// sb.append(ue.getEstimate().getComplexitySymbol());
 					sb.append("<i class=\"icon-tasks\">");
@@ -489,17 +494,15 @@ public class Main {
 					sb.append("</button>");
 				}
 
-				sb.append(";");
+				gmap.put("data", sb.toString());
 
 				// calculate consensus
 
 				if (dm.getStory(story_id).getConsensus() == NO_CONSENSUS) {
-					System.out
-							.println("Story has no consensus from previous iteration ...");
+					System.out.println("Story has no consensus from previous iteration ...");
 
 					if (values.size() == dm.getUsersFromTask(task_id).size()) {
-						System.out
-								.println("Everyone have estimated this story ...");
+						System.out.println("Everyone have estimated this story ...");
 						for (int i = 1; i < values.size(); i++) {
 							if (values.get(i - 1) != values.get(i)) {
 								consensus = false;
@@ -510,19 +513,24 @@ public class Main {
 					}
 
 					if (consensus) {
-						System.out.println("Found consensus");
-						
+						System.out.println(String.format("Found consensus for story [%d], inner if", story_id));
+
 						Story s = dm.getStory(story_id);
-						s.setConsensus(latestEstimations.get(1).getEstimate()
-								.getId());
+						s.setConsensus(latestEstimations.get(1).getEstimate().getId());
 						dm.setStory(s);
-						
-						sb.append("done");
+
+						// sb.append("done");
+						gmap.put("consensus", "true");
 					} else {
-						sb.append("not done");
+						System.out.println(String.format("Did not find consensus for story [%d]", story_id));
+
+						// sb.append("not done");
+						gmap.put("consensus", "false");
 					}
 				} else {
-					sb.append("done");
+					System.out.println(String.format("Found consensus for story [%d]", story_id));
+					// sb.append("done");
+					gmap.put("consensus", "true");
 				}
 
 				// float value = values.get(0);
@@ -551,7 +559,8 @@ public class Main {
 				// sb.append(";done");
 				// }
 
-				return sb.toString();
+				System.out.println(gmap);
+				return gson.toJson(gmap);
 			}
 		});
 
@@ -565,12 +574,10 @@ public class Main {
 				int estimate_id = Integer.parseInt(request.queryParams("estimate_id"));
 
 				List<User> usersOnThisTask = dm.getUsersFromTask(task_id);
-				List<UserEstimate> estimatesByUsersThisIteration = dm
-						.getLatestEstimatesForStory(story_id);
+				List<UserEstimate> estimatesByUsersThisIteration = dm.getLatestEstimatesForStory(story_id);
 
 				// If everyone has voted, increase iteration
-				if (estimatesByUsersThisIteration.size() == usersOnThisTask
-						.size() - 1) {
+				if (estimatesByUsersThisIteration.size() == usersOnThisTask.size() - 1) {
 					dm.addEstimateToStory(story_id, user_id, estimate_id);
 					dm.increaseStoryIteration(story_id);
 				} else {

@@ -21,7 +21,7 @@
 			<label>Story Name</label>
 			<input class="span4" type="text" name="story_name"><br><br>
 			<textarea class="span4" rows="5" name="story_description" placeholder="Enter task description here..." class="span4"></textarea><br><br>
-			<button type=submit" name="action" value="add_story" class="btn pull-right"><i class="icon-pencil"></i> Add another story</button>
+			<button type=submit" name="action" value="add_story" class="btn pull-right"><i class="icon-pencil"></i> Add story</button>
 			<br><br>
 		</form>
 	</div>

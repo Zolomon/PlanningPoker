@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gson.Gson;
+
 import poker.entities.Estimate;
 import poker.entities.Story;
 import poker.entities.Task;
@@ -394,6 +396,13 @@ public class Main {
 				int iteration = dm.getLatestIteration(story_id);
 				
 				List<UserEstimate> previousEstimations = dm.getUserEstimatesForStoryWithIteration(story_id, iteration > 0 ? iteration - 1 : iteration);
+				
+				Gson gson = new Gson();  
+				HashMap<String, String> gmap = new HashMap<String, String>();
+				gmap.put("key1","value1");
+				gmap.put("key2","value2");
+				gmap.put("key3","value3едц\"#¤%&/");
+				System.out.println(gson.toJson(gmap));
 				
 				StringBuilder sb = new StringBuilder();
 				

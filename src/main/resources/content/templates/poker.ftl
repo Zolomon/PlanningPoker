@@ -119,7 +119,7 @@
 				//	$inputs.prop("disabled", false);	
 				//}
 			});
-		}, 3000);
+		}, 500);
 	</#list>
 </script>
 

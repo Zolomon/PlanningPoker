@@ -52,7 +52,7 @@ public class DatabaseManager {
 		this.debug = stream;
 	}
 
-	public void init() {
+	public synchronized void init() {
 		Connection connection = null;
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -174,13 +174,13 @@ public class DatabaseManager {
 			addUserToTask(2, 4);
 			addUserToTask(2, 5);
 
-//			addEstimateToStory(1, 1, 4);
-//			addEstimateToStory(1, 2, 4);
-//			addEstimateToStory(1, 2, 3);
+			// addEstimateToStory(1, 1, 4);
+			// addEstimateToStory(1, 2, 4);
+			// addEstimateToStory(1, 2, 3);
 		}
 	}
 
-	public void createFibonacciEstimations(int task_id) {
+	public synchronized void createFibonacciEstimations(int task_id) {
 		insertEstimate(new Estimate(task_id, "0", UnitType.PERSON_DAYS, 0));
 		insertEstimate(new Estimate(task_id, "1/2", UnitType.PERSON_DAYS, 0.5f));
 		insertEstimate(new Estimate(task_id, "1", UnitType.PERSON_DAYS, 1f));
@@ -196,7 +196,7 @@ public class DatabaseManager {
 		insertEstimate(new Estimate(task_id, "coffee", UnitType.PERSON_DAYS, -1));
 	}
 
-	public Task getTask(int id) {
+	public synchronized Task getTask(int id) {
 		Task task = null;
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -229,7 +229,7 @@ public class DatabaseManager {
 		return task;
 	}
 
-	public void setTask(Task task) {
+	public synchronized void setTask(Task task) {
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
@@ -252,7 +252,7 @@ public class DatabaseManager {
 
 	}
 
-	public int insertTask(Task task) {
+	public synchronized int insertTask(Task task) {
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 			PreparedStatement ps = connection.prepareStatement("INSERT into tasks (name, description) values (?,?)");
@@ -272,7 +272,7 @@ public class DatabaseManager {
 		return getLatestTask();
 	}
 
-	public void deleteTask(int id) {
+	public synchronized void deleteTask(int id) {
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
@@ -303,7 +303,7 @@ public class DatabaseManager {
 
 	}
 
-	public Story getStory(int id) {
+	public synchronized Story getStory(int id) {
 		Story story = null;
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -330,7 +330,7 @@ public class DatabaseManager {
 		return story;
 	}
 
-	public void setStory(Story story) {
+	public synchronized void setStory(Story story) {
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
@@ -354,7 +354,7 @@ public class DatabaseManager {
 
 	}
 
-	public int insertStory(Story story) {
+	public synchronized int insertStory(Story story) {
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 			PreparedStatement ps = connection
@@ -375,7 +375,7 @@ public class DatabaseManager {
 		return getLatestStory();
 	}
 
-	public void deleteStory(int id) {
+	public synchronized void deleteStory(int id) {
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
@@ -407,7 +407,7 @@ public class DatabaseManager {
 
 	}
 
-	public User getUser(int id) {
+	public synchronized User getUser(int id) {
 		User user = null;
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -431,7 +431,7 @@ public class DatabaseManager {
 		return user;
 	}
 
-	public int insertUser(User user) {
+	public synchronized int insertUser(User user) {
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 			PreparedStatement ps = connection.prepareStatement("INSERT into users (name) values (?)");
@@ -449,7 +449,7 @@ public class DatabaseManager {
 		return getLatestUser();
 	}
 
-	public void deleteUser(int id) {
+	public synchronized void deleteUser(int id) {
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
@@ -485,7 +485,7 @@ public class DatabaseManager {
 
 	}
 
-	public void setUser(User user) {
+	public synchronized void setUser(User user) {
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
@@ -505,7 +505,7 @@ public class DatabaseManager {
 
 	}
 
-	public Estimate getEstimate(int id) {
+	public synchronized Estimate getEstimate(int id) {
 		Estimate estimate = null;
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -531,7 +531,7 @@ public class DatabaseManager {
 		return estimate;
 	}
 
-	public void setEstimate(Estimate estimate) {
+	public synchronized void setEstimate(Estimate estimate) {
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
@@ -554,7 +554,7 @@ public class DatabaseManager {
 
 	}
 
-	public int insertEstimate(Estimate estimate) {
+	public synchronized int insertEstimate(Estimate estimate) {
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 			PreparedStatement ps = connection
@@ -576,7 +576,7 @@ public class DatabaseManager {
 		return getLatestEstimate();
 	}
 
-	public void deleteEstimate(int id) {
+	public synchronized void deleteEstimate(int id) {
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
@@ -594,7 +594,7 @@ public class DatabaseManager {
 
 	}
 
-	public List<Story> getStoriesFromTask(int task_id) {
+	public synchronized List<Story> getStoriesFromTask(int task_id) {
 		List<Story> stories = new ArrayList<Story>();
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -623,7 +623,7 @@ public class DatabaseManager {
 		return stories;
 	}
 
-	public List<User> getUsersFromTask(int task_id) {
+	public synchronized List<User> getUsersFromTask(int task_id) {
 		List<User> users = new ArrayList<User>();
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -651,7 +651,7 @@ public class DatabaseManager {
 		return users;
 	}
 
-	public HashMap<User, List<Estimate>> getEstimatesFromStory(int story_id) {
+	public synchronized HashMap<User, List<Estimate>> getEstimatesFromStory(int story_id) {
 		HashMap<User, List<Estimate>> storyEstimations = new HashMap<User, List<Estimate>>();
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -675,7 +675,7 @@ public class DatabaseManager {
 		return storyEstimations;
 	}
 
-	public List<Estimate> getEstimatesFromUser(int user_id) {
+	public synchronized List<Estimate> getEstimatesFromUser(int user_id) {
 		List<Estimate> estimations = new ArrayList<Estimate>();
 
 		try {
@@ -706,7 +706,7 @@ public class DatabaseManager {
 		return estimations;
 	}
 
-	public void deleteEstimateFromStory(int story_id, int estimate_id) {
+	public synchronized void deleteEstimateFromStory(int story_id, int estimate_id) {
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
@@ -725,7 +725,7 @@ public class DatabaseManager {
 		}
 	}
 
-	public void deleteUserFromTask(int task_id, int user_id) {
+	public synchronized void deleteUserFromTask(int task_id, int user_id) {
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
@@ -743,7 +743,7 @@ public class DatabaseManager {
 		}
 	}
 
-	public void addUserToTask(int task_id, int user_id) {
+	public synchronized void addUserToTask(int task_id, int user_id) {
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
@@ -761,7 +761,7 @@ public class DatabaseManager {
 		}
 	}
 
-	public void addEstimateToStory(int story_id, int user_id, int estimate_id) {
+	public synchronized void addEstimateToStory(int story_id, int user_id, int estimate_id) {
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
@@ -783,7 +783,7 @@ public class DatabaseManager {
 
 	}
 
-	public List<Estimate> getEstimationsForTask(int task_id) {
+	public synchronized List<Estimate> getEstimationsForTask(int task_id) {
 		List<Estimate> estimations = new ArrayList<Estimate>();
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -814,7 +814,7 @@ public class DatabaseManager {
 		return estimations;
 	}
 
-	public List<Task> getTasks() {
+	public synchronized List<Task> getTasks() {
 		List<Task> tasks = new ArrayList<Task>();
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -921,7 +921,7 @@ public class DatabaseManager {
 		return id;
 	}
 
-	public int getLatestIteration(int story_id) {
+	public synchronized int getLatestIteration(int story_id) {
 		int iteration = -1;
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -946,7 +946,7 @@ public class DatabaseManager {
 		return iteration;
 	}
 
-	public void increaseStoryIteration(int story_id) {
+	public synchronized void increaseStoryIteration(int story_id) {
 
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -967,7 +967,7 @@ public class DatabaseManager {
 		}
 	}
 
-	public List<UserEstimate> getUserEstimatesForStoryWithIteration(int story_id, int iteration) {
+	public synchronized List<UserEstimate> getUserEstimatesForStoryWithIteration(int story_id, int iteration) {
 		List<UserEstimate> estimations = new ArrayList<UserEstimate>();
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -1000,11 +1000,11 @@ public class DatabaseManager {
 		return estimations;
 	}
 
-	public List<UserEstimate> getLatestEstimatesForStory(int story_id) {
+	public synchronized List<UserEstimate> getLatestEstimatesForStory(int story_id) {
 		return getUserEstimatesForStoryWithIteration(story_id, getLatestIteration(story_id));
 	}
 
-	public List<User> getUsers() {
+	public synchronized List<User> getUsers() {
 		List<User> users = new ArrayList<User>();
 		try {
 			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
@@ -1026,6 +1026,5 @@ public class DatabaseManager {
 
 		return users;
 	}
-	
-	
+
 }

@@ -19,6 +19,7 @@ import com.google.gson.Gson;
 
 import poker.entities.Estimate;
 import poker.entities.Story;
+import poker.entities.StoryEstimate;
 import poker.entities.Task;
 import poker.entities.UnitType;
 import poker.entities.User;
@@ -237,24 +238,19 @@ public class Main {
 				int task_id = Integer.parseInt(request.params(":id"));
 
 				int unit = 1;
-				if (request.queryParams("estimation_unit").toLowerCase()
-						.equals("person days"))
+				if (request.queryParams("estimation_unit").toLowerCase().equals("person days"))
 					unit = 2;
-				if (request.queryParams("estimation_unit").toLowerCase()
-						.equals("person months"))
+				if (request.queryParams("estimation_unit").toLowerCase().equals("person months"))
 					unit = 3;
-				if (request.queryParams("estimation_unit").toLowerCase()
-						.equals("person years"))
+				if (request.queryParams("estimation_unit").toLowerCase().equals("person years"))
 					unit = 4;
 
-				List<Estimate> task_estimations = dm
-						.getEstimationsForTask(task_id);
+				List<Estimate> task_estimations = dm.getEstimationsForTask(task_id);
 
 				for (Estimate estimate : task_estimations) {
 					try {
-						float parsedValue = Float.parseFloat(request
-								.queryParams(String.format("complexity-%d",
-										estimate.getId())));
+						float parsedValue = Float.parseFloat(request.queryParams(String.format("complexity-%d",
+								estimate.getId())));
 						estimate.setUnitValue(parsedValue);
 					} catch (NullPointerException | NumberFormatException e) {
 						// no new (or strange) value, let's happily skip it!
@@ -309,8 +305,7 @@ public class Main {
 
 				dm.deleteStory(story_id);
 
-				response.redirect(String.format("/task/%d/edit/stories",
-						task_id));
+				response.redirect(String.format("/task/%d/edit/stories", task_id));
 				return null;
 			}
 		});
@@ -325,8 +320,7 @@ public class Main {
 
 				dm.insertStory(new Story(task_id, story_name, story_desc));
 
-				response.redirect(String.format("/task/%d/edit/stories",
-						task_id));
+				response.redirect(String.format("/task/%d/edit/stories", task_id));
 				return null;
 			}
 		});
@@ -353,8 +347,7 @@ public class Main {
 				t.setPublishedAt(null);
 				dm.setTask(t);
 
-				response.redirect(String.format("/task/%d/edit/stories",
-						task_id));
+				response.redirect(String.format("/task/%d/edit/stories", task_id));
 				return null;
 			}
 		});
@@ -368,7 +361,33 @@ public class Main {
 				Map<String, Object> root = new HashMap<String, Object>();
 				root.put("id", task_id);
 
-				List<Story> stories = dm.getStoriesFromTask(task_id);
+				List<StoryEstimate> stories = new ArrayList<StoryEstimate>();
+				for (Story s : dm.getStoriesFromTask(task_id)) {
+					stories.add(new StoryEstimate(s,
+							(s.getConsensus() == -1 ? 0 : dm.getEstimate(s.getConsensus()).getUnitValue())
+					));
+				}
+				root.put("stories", stories);
+
+				return render("task_summary.ftl", cfg, root);
+			}
+		});
+
+		get(new Route("/task/:id/summary/unit/:unit_id") {
+			@Override
+			public Object handle(Request request, Response response) {
+
+				int task_id = Integer.parseInt(request.params(":id"));
+				int unit_id = Integer.parseInt(request.params(":unit_id"));
+
+				Map<String, Object> root = new HashMap<String, Object>();
+				root.put("id", task_id);
+
+				List<StoryEstimate> stories = new ArrayList<StoryEstimate>();
+				for (Story s : dm.getStoriesFromTask(task_id)) {
+					stories.add(new StoryEstimate(s, s.getConsensus() == -1 ? 0 : dm.getEstimate(s.getConsensus()).getUnitValue()));
+				}
+				
 				root.put("stories", stories);
 
 				return render("task_summary.ftl", cfg, root);
@@ -409,17 +428,11 @@ public class Main {
 
 				// TODO: Calculate consensus divergence and colour code
 				// differences
-				List<UserEstimate> latestEstimations = dm
-						.getLatestEstimatesForStory(story_id);
+				List<UserEstimate> latestEstimations = dm.getLatestEstimatesForStory(story_id);
 				int iteration = dm.getLatestIteration(story_id);
 
-				List<UserEstimate> previousEstimations = dm
-						.getUserEstimatesForStoryWithIteration(story_id,
-								iteration > 0 ? iteration - 1 : iteration);
-
-				List<UserEstimate> currentEstimations = dm
-						.getUserEstimatesForStoryWithIteration(story_id,
-								iteration);
+				List<UserEstimate> previousEstimations = dm.getUserEstimatesForStoryWithIteration(story_id,
+						iteration > 0 ? iteration - 1 : iteration);
 
 				Gson gson = new Gson();
 				HashMap<String, String> gmap = new HashMap<String, String>();
@@ -454,8 +467,7 @@ public class Main {
 
 					for (UserEstimate userEstimate : previousEstimations) {
 
-						sb.append(userEstimate.getEstimate()
-								.getComplexitySymbol());
+						sb.append(userEstimate.getEstimate().getComplexitySymbol());
 						sb.append(" ");
 					}
 					sb.append("</span>");
@@ -471,6 +483,8 @@ public class Main {
 
 					sb.append("<button class=\"btn btn-info btn-small\">");
 					// sb.append(ue.getEstimate().getComplexitySymbol());
+					sb.append("<i class=\"icon-tasks\">");
+					sb.append("</i> ");
 					sb.append(ue.getUser().getName());
 					sb.append("</button>");
 				}
@@ -548,8 +562,7 @@ public class Main {
 				int task_id = Integer.parseInt(request.params(":task_id"));
 				int user_id = Integer.parseInt(request.params(":user_id"));
 				int story_id = Integer.parseInt(request.params(":story_id"));
-				int estimate_id = Integer.parseInt(request
-						.queryParams("estimate_id"));
+				int estimate_id = Integer.parseInt(request.queryParams("estimate_id"));
 
 				List<User> usersOnThisTask = dm.getUsersFromTask(task_id);
 				List<UserEstimate> estimatesByUsersThisIteration = dm

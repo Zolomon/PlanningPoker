@@ -9,9 +9,9 @@
 		<thead><tr><th>Name</th><th>Description</th><th>Consensus</th></tr></thead>
 		<#list stories as story>
 			<tr>
-				<td>${story.name}</td>
-				<td>${story.description}</td>
-				<td>${story.consensus}</td>
+				<td>${story.story.name}</td>
+				<td>${story.story.description}</td>
+				<td>${story.estimate}</td>
 			</tr>
 		</#list>
 		</table>

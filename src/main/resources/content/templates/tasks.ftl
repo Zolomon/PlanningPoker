@@ -11,7 +11,7 @@
 			<tr>
 			<#escape x as x?html>
 				<td class="span2">
-					<a href="/summary/<#noescape>${task.id}</#noescape>" class="btn btn-mini btn-info"><i class="icon-info-sign icon-white"></i> Summary</a>
+					<a href="/task/<#noescape>${task.id}</#noescape>/summary" class="btn btn-mini btn-info"><i class="icon-info-sign icon-white"></i> Summary</a>
 				</td>
 				<td>
 					<a href="/task/<#noescape>${task.id}</#noescape>/edit/info">${task.name}</a>

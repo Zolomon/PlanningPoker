@@ -1,6 +1,9 @@
 package poker.entities;
 
 public class Estimate {
+	private static final int WORK_DAYS_PER_YEAR = 165;
+	private static final int WORK_DAYS_PER_MONTH = 22;
+	private static final int WORK_HOURS_PER_DAY = 24;
 	private int id;
 	private int task_id;
 	private String complexity_symbol;
@@ -82,5 +85,36 @@ public class Estimate {
 	@Override
 	public String toString() {
 		return String.format("[%d, %d, %s, %s, %f]", getId(), getTaskId(), getComplexitySymbol(), getUnit().name(), getUnitValue()); 
+	}
+	
+	public float getUnitValue(UnitType type) {
+		float hours = convertToHours();
+		switch(type) {
+		case PERSON_DAYS:
+			 return hours / WORK_HOURS_PER_DAY;
+		case PERSON_HOURS:
+			return hours;
+		case PERSON_MONTHS:
+			return hours / (WORK_HOURS_PER_DAY * WORK_DAYS_PER_MONTH);
+		case PERSON_YEARS:
+			return hours / (WORK_HOURS_PER_DAY * WORK_DAYS_PER_YEAR);
+		default:
+			return 0;
+		}
+	}
+	
+	private float convertToHours() {
+		switch (unit) {
+		case PERSON_HOURS:
+			return unit_value;
+		case PERSON_DAYS:
+			return unit_value * WORK_HOURS_PER_DAY;
+		case PERSON_MONTHS:
+			return unit_value * WORK_DAYS_PER_MONTH * WORK_HOURS_PER_DAY; 
+		case PERSON_YEARS:
+			return unit_value * WORK_DAYS_PER_YEAR * WORK_HOURS_PER_DAY;
+		default:
+			return 0;
+		}
 	}
 }

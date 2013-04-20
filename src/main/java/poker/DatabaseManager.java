@@ -27,10 +27,11 @@ import poker.entities.User;
 import poker.entities.UserEstimate;
 
 public class DatabaseManager {
-	private static final String	JDBC_SQLITE_POKER_DB	= "jdbc:sqlite:poker.db";
-	private SimpleDateFormat	dateFormat				= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-	private OutputStream		debug;
-	private boolean				debugging				= true;
+	private static final String JDBC_SQLITE_POKER_DB = "jdbc:sqlite:poker.db";
+	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private OutputStream debug;
+	private boolean debugging = true;
+	private Connection connection = null;
 
 	private void debug(String msg) {
 		if (debug == null) {
@@ -53,7 +54,6 @@ public class DatabaseManager {
 	}
 
 	public synchronized void init() {
-		Connection connection = null;
 		try {
 			connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
 
@@ -61,16 +61,20 @@ public class DatabaseManager {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			try {
-				if (connection != null) {
-					connection.close();
-				}
-			} catch (Exception e) {
-				// connection close failed.
-				System.err.println(e);
-			}
 		}
+		// finally {
+		// try {
+		// if (connection != null) {
+		// connection.close();
+		// System.out.println("Connection closed.");
+		// }
+		// } catch (Exception e) {
+		// // connection close failed.
+		// System.err.println(e);
+		// }
+		// }
+
+		// connection = null;
 	}
 
 	private void createTables(Connection connection) throws Exception {
@@ -199,7 +203,7 @@ public class DatabaseManager {
 	public synchronized Task getTask(int id) {
 		Task task = null;
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection
 					.prepareStatement("SELECT id, name, description, datetime(created_at), datetime(published_at) FROM tasks where id=? LIMIT 1");
@@ -220,8 +224,8 @@ public class DatabaseManager {
 				}
 			}
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -231,7 +235,7 @@ public class DatabaseManager {
 
 	public synchronized void setTask(Task task) {
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection
 					.prepareStatement("UPDATE tasks set name=?, created_at=?, published_at=? where id=?");
@@ -244,8 +248,8 @@ public class DatabaseManager {
 
 			ps.executeUpdate();
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -254,7 +258,7 @@ public class DatabaseManager {
 
 	public synchronized int insertTask(Task task) {
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 			PreparedStatement ps = connection.prepareStatement("INSERT into tasks (name, description) values (?,?)");
 			ps.setString(1, task.getName());
 			ps.setString(2, task.getDescription());
@@ -263,8 +267,8 @@ public class DatabaseManager {
 
 			ps.executeUpdate();
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -274,7 +278,7 @@ public class DatabaseManager {
 
 	public synchronized void deleteTask(int id) {
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			// Clean stories
 			List<Story> stories = getStoriesFromTask(id);
@@ -295,8 +299,8 @@ public class DatabaseManager {
 
 			ps.executeUpdate();
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -306,7 +310,7 @@ public class DatabaseManager {
 	public synchronized Story getStory(int id) {
 		Story story = null;
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection
 					.prepareStatement("SELECT id, task_id, name, description, consensus, iteration FROM stories where id=? LIMIT 1");
@@ -321,8 +325,8 @@ public class DatabaseManager {
 				debug("Fetching story: " + story.toString());
 			}
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -332,7 +336,7 @@ public class DatabaseManager {
 
 	public synchronized void setStory(Story story) {
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection
 					.prepareStatement("UPDATE stories SET name=?, description=?, consensus=?, iteration=? where id=?");
@@ -346,8 +350,8 @@ public class DatabaseManager {
 
 			ps.executeUpdate();
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -356,7 +360,7 @@ public class DatabaseManager {
 
 	public synchronized int insertStory(Story story) {
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 			PreparedStatement ps = connection
 					.prepareStatement("INSERT into stories (task_id, name, description) values (?,?,?)");
 			ps.setInt(1, story.getTaskId());
@@ -367,8 +371,8 @@ public class DatabaseManager {
 
 			ps.executeUpdate();
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -377,7 +381,7 @@ public class DatabaseManager {
 
 	public synchronized void deleteStory(int id) {
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			HashMap<User, List<Estimate>> storyEstimates = getEstimatesFromStory(id);
 
@@ -399,8 +403,8 @@ public class DatabaseManager {
 
 			debug("Deleting story with id: " + id);
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -410,7 +414,7 @@ public class DatabaseManager {
 	public synchronized User getUser(int id) {
 		User user = null;
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection.prepareStatement("SELECT id, name FROM users where id=? LIMIT 1");
 			ps.setInt(1, id);
@@ -422,8 +426,8 @@ public class DatabaseManager {
 				debug("Fetching user: " + user.toString());
 			}
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -433,7 +437,7 @@ public class DatabaseManager {
 
 	public synchronized int insertUser(User user) {
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 			PreparedStatement ps = connection.prepareStatement("INSERT into users (name) values (?)");
 			ps.setString(1, user.getName());
 
@@ -441,8 +445,8 @@ public class DatabaseManager {
 
 			ps.executeUpdate();
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -451,7 +455,7 @@ public class DatabaseManager {
 
 	public synchronized void deleteUser(int id) {
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			// Should delete from task_team
 			PreparedStatement ps = connection.prepareStatement("DELETE FROM task_team where user_id=?");
@@ -477,8 +481,8 @@ public class DatabaseManager {
 
 			ps.executeUpdate();
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -487,7 +491,7 @@ public class DatabaseManager {
 
 	public synchronized void setUser(User user) {
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection.prepareStatement("UPDATE users SET name=? where id=?");
 			ps.setString(1, user.getName());
@@ -497,8 +501,8 @@ public class DatabaseManager {
 
 			ps.executeUpdate();
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -508,7 +512,7 @@ public class DatabaseManager {
 	public synchronized Estimate getEstimate(int id) {
 		Estimate estimate = null;
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection
 					.prepareStatement("SELECT id, task_id, complexity_symbol, unit, unit_value FROM estimations where id=? LIMIT 1");
@@ -522,8 +526,8 @@ public class DatabaseManager {
 				debug("Fetching estimate: " + estimate.toString());
 			}
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -533,7 +537,7 @@ public class DatabaseManager {
 
 	public synchronized void setEstimate(Estimate estimate) {
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection
 					.prepareStatement("UPDATE estimations SET complexity_symbol=?, unit=?, unit_value=? where id=?");
@@ -546,8 +550,8 @@ public class DatabaseManager {
 
 			ps.executeUpdate();
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -556,7 +560,7 @@ public class DatabaseManager {
 
 	public synchronized int insertEstimate(Estimate estimate) {
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 			PreparedStatement ps = connection
 					.prepareStatement("INSERT into estimations (task_id, complexity_symbol, unit, unit_value) values (?,?,?,?)");
 			ps.setInt(1, estimate.getTaskId());
@@ -568,8 +572,8 @@ public class DatabaseManager {
 
 			ps.executeUpdate();
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -578,7 +582,7 @@ public class DatabaseManager {
 
 	public synchronized void deleteEstimate(int id) {
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection.prepareStatement("DELETE FROM estimations where id=?");
 			ps.setInt(1, id);
@@ -586,8 +590,8 @@ public class DatabaseManager {
 			debug("Deleting estimate with id: " + id);
 			ps.executeUpdate();
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -597,7 +601,7 @@ public class DatabaseManager {
 	public synchronized List<Story> getStoriesFromTask(int task_id) {
 		List<Story> stories = new ArrayList<Story>();
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection
 					.prepareStatement("SELECT id, task_id, name, description, consensus, iteration FROM stories where task_id=?");
@@ -614,8 +618,8 @@ public class DatabaseManager {
 				debug("Fetching story: " + story.toString());
 			}
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -626,7 +630,7 @@ public class DatabaseManager {
 	public synchronized List<User> getUsersFromTask(int task_id) {
 		List<User> users = new ArrayList<User>();
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection
 					.prepareStatement("SELECT users.id, users.name FROM users JOIN task_team ON users.id=task_team.user_id WHERE task_team.task_id=?");
@@ -642,8 +646,8 @@ public class DatabaseManager {
 				debug("Fetching user: " + user.toString());
 			}
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -654,7 +658,7 @@ public class DatabaseManager {
 	public synchronized HashMap<User, List<Estimate>> getEstimatesFromStory(int story_id) {
 		HashMap<User, List<Estimate>> storyEstimations = new HashMap<User, List<Estimate>>();
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection
 					.prepareStatement("SELECT estimations.id, task_id, complexity_symbol, unit, unit_value FROM estimations where id=? LIMIT 1");
@@ -666,8 +670,8 @@ public class DatabaseManager {
 				storyEstimations.put(user, getEstimatesFromUser(user.getId()));
 			}
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -679,7 +683,7 @@ public class DatabaseManager {
 		List<Estimate> estimations = new ArrayList<Estimate>();
 
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection
 					.prepareStatement("SELECT estimations.id, estimations.task_id, estimations.complexity_symbol, estimations.unit, "
@@ -697,8 +701,8 @@ public class DatabaseManager {
 				estimations.add(estimate);
 			}
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -708,7 +712,7 @@ public class DatabaseManager {
 
 	public synchronized void deleteEstimateFromStory(int story_id, int estimate_id) {
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection
 					.prepareStatement("DELETE FROM story_user_estimations where story_id = ? and estimate_id=?");
@@ -718,8 +722,8 @@ public class DatabaseManager {
 			debug(String.format("Deleting estimate [%d] from story [%d]", estimate_id, story_id));
 			ps.executeUpdate();
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -727,7 +731,7 @@ public class DatabaseManager {
 
 	public synchronized void deleteUserFromTask(int task_id, int user_id) {
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection.prepareStatement("DELETE FROM task_team where task_id = ? and user_id=?");
 			ps.setInt(1, task_id);
@@ -736,8 +740,8 @@ public class DatabaseManager {
 			debug(String.format("Deleting user [%d] from task [%d]", user_id, task_id));
 			ps.executeUpdate();
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -745,7 +749,7 @@ public class DatabaseManager {
 
 	public synchronized void addUserToTask(int task_id, int user_id) {
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection.prepareStatement("INSERT INTO task_team (user_id, task_id) VALUES (?,?)");
 			ps.setInt(1, user_id);
@@ -754,8 +758,8 @@ public class DatabaseManager {
 			debug("Adding user [" + user_id + "] to task [" + task_id + "]");
 			ps.executeUpdate();
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -763,7 +767,7 @@ public class DatabaseManager {
 
 	public synchronized void addEstimateToStory(int story_id, int user_id, int estimate_id) {
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection
 					.prepareStatement("INSERT INTO story_user_estimations (story_id, user_id, estimation_id, story_iteration) VALUES (?,?,?,?)");
@@ -775,8 +779,8 @@ public class DatabaseManager {
 			debug("Adding estimate [" + estimate_id + "] to story [" + story_id + "] for user [" + user_id + "]");
 			ps.executeUpdate();
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -786,7 +790,7 @@ public class DatabaseManager {
 	public synchronized List<Estimate> getEstimationsForTask(int task_id) {
 		List<Estimate> estimations = new ArrayList<Estimate>();
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection
 					.prepareStatement("SELECT id, task_id, complexity_symbol, unit, unit_value from estimations where task_id = ? ");
@@ -805,8 +809,8 @@ public class DatabaseManager {
 				estimations.add(estimate);
 			}
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -817,7 +821,7 @@ public class DatabaseManager {
 	public synchronized List<Task> getTasks() {
 		List<Task> tasks = new ArrayList<Task>();
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection.prepareStatement("SELECT id from tasks ORDER BY id ASC");
 
@@ -827,11 +831,12 @@ public class DatabaseManager {
 			while (res.next()) {
 				tasks.add(getTask(res.getInt("id")));
 			}
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+
 		}
 
 		return tasks;
@@ -840,7 +845,7 @@ public class DatabaseManager {
 	private int getLatestTask() {
 		int id = Integer.MIN_VALUE;
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection.prepareStatement("SELECT id from tasks ORDER BY id DESC LIMIT 1");
 
@@ -849,8 +854,8 @@ public class DatabaseManager {
 				debug(String.format("Getting newest task [%d]", res.getInt("id")));
 				id = res.getInt("id");
 			}
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -861,7 +866,7 @@ public class DatabaseManager {
 	private int getLatestStory() {
 		int id = Integer.MIN_VALUE;
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection.prepareStatement("SELECT id from stories ORDER BY id DESC LIMIT 1");
 
@@ -870,8 +875,8 @@ public class DatabaseManager {
 				debug(String.format("Getting newest story [%d]", res.getInt("id")));
 				id = res.getInt("id");
 			}
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -882,7 +887,7 @@ public class DatabaseManager {
 	private int getLatestUser() {
 		int id = Integer.MIN_VALUE;
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection.prepareStatement("SELECT id from users ORDER BY id DESC LIMIT 1");
 
@@ -891,8 +896,8 @@ public class DatabaseManager {
 				debug(String.format("Getting newest user [%d]", res.getInt("id")));
 				id = res.getInt("id");
 			}
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -903,7 +908,7 @@ public class DatabaseManager {
 	private int getLatestEstimate() {
 		int id = Integer.MIN_VALUE;
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection.prepareStatement("SELECT id from estimations ORDER BY id DESC LIMIT 1");
 
@@ -912,8 +917,8 @@ public class DatabaseManager {
 				debug(String.format("Getting newest estimate [%d]", res.getInt("id")));
 				id = res.getInt("id");
 			}
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -924,7 +929,7 @@ public class DatabaseManager {
 	public synchronized int getLatestIteration(int story_id) {
 		int iteration = -1;
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection.prepareStatement("SELECT iteration FROM stories WHERE id=?");
 			ps.setInt(1, story_id);
@@ -937,8 +942,8 @@ public class DatabaseManager {
 				iteration = res.getInt("iteration");
 			}
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -949,7 +954,7 @@ public class DatabaseManager {
 	public synchronized void increaseStoryIteration(int story_id) {
 
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection
 					.prepareStatement("UPDATE stories SET iteration=((select iteration from stories where id=? order by iteration desc limit 1)+1) where id=?");
@@ -960,8 +965,8 @@ public class DatabaseManager {
 
 			ps.executeUpdate();
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e1) {
 			e1.printStackTrace();
 		}
@@ -970,7 +975,7 @@ public class DatabaseManager {
 	public synchronized List<UserEstimate> getUserEstimatesForStoryWithIteration(int story_id, int iteration) {
 		List<UserEstimate> estimations = new ArrayList<UserEstimate>();
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 			PreparedStatement ps = connection.prepareStatement("select e.id as 'estimate_id', sue.user_id as 'user_id'"
 					+ "from story_user_estimations sue " + "inner join estimations e on sue.estimation_id=e.id "
 					+ "where sue.story_id=? and sue.story_iteration=? " + "order by sue.user_id asc");
@@ -992,8 +997,8 @@ public class DatabaseManager {
 				estimations.add(new UserEstimate(user, estimate));
 			}
 
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1007,7 +1012,7 @@ public class DatabaseManager {
 	public synchronized List<User> getUsers() {
 		List<User> users = new ArrayList<User>();
 		try {
-			Connection connection = DriverManager.getConnection(JDBC_SQLITE_POKER_DB);
+			
 
 			PreparedStatement ps = connection.prepareStatement("SELECT id from users ORDER BY id ASC");
 
@@ -1017,8 +1022,8 @@ public class DatabaseManager {
 			while (res.next()) {
 				users.add(getUser(res.getInt("id")));
 			}
-			connection.close();
-			connection = null;
+			;
+			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

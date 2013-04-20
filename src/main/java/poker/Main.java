@@ -32,13 +32,15 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 public class Main {
-	private static DatabaseManager	dm;
+	private static final int NO_CONSENSUS = -1;
+	private static DatabaseManager dm;
 
 	private void debug(String msg) {
 		System.out.println(msg);
 	}
 
-	private static String render(String filename, Configuration cfg, Map<String, Object> root) {
+	private static String render(String filename, Configuration cfg,
+			Map<String, Object> root) {
 		try {
 
 			/* Get or create a template */
@@ -67,8 +69,8 @@ public class Main {
 		final Configuration cfg = new Configuration();
 		try {
 
-			File file = new File(Thread.currentThread().getContextClassLoader().getResource("content/templates/")
-					.toURI());
+			File file = new File(Thread.currentThread().getContextClassLoader()
+					.getResource("content/templates/").toURI());
 
 			cfg.setDirectoryForTemplateLoading(file);
 			cfg.setObjectWrapper(new DefaultObjectWrapper());
@@ -112,7 +114,7 @@ public class Main {
 
 				/* Create a data-model */
 				Map<String, Object> root = new HashMap<String, Object>();
-				root.put("task", new Task("",""));
+				root.put("task", new Task("", ""));
 				root.put("edit", false);
 				return render("task_info.ftl", cfg, root);
 			}
@@ -124,7 +126,8 @@ public class Main {
 			@Override
 			public Object handle(Request request, Response response) {
 
-				int id = dm.insertTask(new Task(request.queryParams("task_name"), request
+				int id = dm.insertTask(new Task(request
+						.queryParams("task_name"), request
 						.queryParams("task_description")));
 				dm.createFibonacciEstimations(id);
 
@@ -143,12 +146,12 @@ public class Main {
 				root.put("users", dm.getUsers());
 				root.put("task_users", dm.getUsersFromTask(task_id));
 				root.put("edit", true);
-				
+
 				return render("task_info.ftl", cfg, root);
 			}
 
 		});
-		
+
 		post(new Route("/task/:id/edit/info") {
 
 			@Override
@@ -157,61 +160,60 @@ public class Main {
 				Task t = dm.getTask(task_id);
 				String name = request.queryParams("task_name");
 				String desc = request.queryParams("task_description");
-				
+
 				t.setName(name);
 				t.setDescription(desc);
-				
+
 				dm.setTask(t);
-				
+
 				response.redirect(String.format("/task/%d/edit/info", task_id));
 				return null;
 			}
 
 		});
-		
+
 		post(new Route("/task/:id/edit/user/create") {
 			@Override
 			public Object handle(Request request, Response response) {
 
 				int task_id = Integer.parseInt(request.params(":id"));
-				
+
 				String name = request.queryParams("user_name");
 				User user = new User(name);
-				dm.insertUser(user);				
-				
+				dm.insertUser(user);
+
 				response.redirect(String.format("/task/%d/edit/info", task_id));
 				return null;
 			}
 		});
-		
+
 		post(new Route("/task/:id/edit/user/add") {
 			@Override
 			public Object handle(Request request, Response response) {
 
 				int task_id = Integer.parseInt(request.params(":id"));
-				
+
 				int user_id = Integer.parseInt(request.queryParams("user"));
 				dm.addUserToTask(task_id, user_id);
-				
+
 				response.redirect(String.format("/task/%d/edit/info", task_id));
 				return null;
 			}
 		});
-		
+
 		get(new Route("/task/:id/edit/user/:user_id/remove") {
 			@Override
 			public Object handle(Request request, Response response) {
 
 				int task_id = Integer.parseInt(request.params(":id"));
-				
+
 				int user_id = Integer.parseInt(request.params(":user_id"));
 				dm.deleteUserFromTask(task_id, user_id);
-				
+
 				response.redirect(String.format("/task/%d/edit/info", task_id));
 				return null;
 			}
 		});
-
 
 		get(new Route("/task/:id/edit/estimations") {
 
@@ -233,27 +235,37 @@ public class Main {
 			@Override
 			public Object handle(Request request, Response response) {
 				int task_id = Integer.parseInt(request.params(":id"));
-				
+
 				int unit = 1;
-				if (request.queryParams("estimation_unit").toLowerCase().equals("person days")) unit = 2;
-				if (request.queryParams("estimation_unit").toLowerCase().equals("person months")) unit = 3;
-				if (request.queryParams("estimation_unit").toLowerCase().equals("person years")) unit = 4;
-								
-				List<Estimate> task_estimations = dm.getEstimationsForTask(task_id);
-				
+				if (request.queryParams("estimation_unit").toLowerCase()
+						.equals("person days"))
+					unit = 2;
+				if (request.queryParams("estimation_unit").toLowerCase()
+						.equals("person months"))
+					unit = 3;
+				if (request.queryParams("estimation_unit").toLowerCase()
+						.equals("person years"))
+					unit = 4;
+
+				List<Estimate> task_estimations = dm
+						.getEstimationsForTask(task_id);
+
 				for (Estimate estimate : task_estimations) {
 					try {
-						float parsedValue = Float.parseFloat(request.queryParams(String.format("complexity-%d", estimate.getId())));
+						float parsedValue = Float.parseFloat(request
+								.queryParams(String.format("complexity-%d",
+										estimate.getId())));
 						estimate.setUnitValue(parsedValue);
 					} catch (NullPointerException | NumberFormatException e) {
 						// no new (or strange) value, let's happily skip it!
 					}
 
-					// we still need to set the new unit type on all estimations!
-					estimate.setUnit(UnitType.values()[unit-1]);
+					// we still need to set the new unit type on all
+					// estimations!
+					estimate.setUnit(UnitType.values()[unit - 1]);
 					dm.setEstimate(estimate);
 				}
-				
+
 				response.redirect("/task/" + task_id + "/edit/estimations");
 				return null;
 			}
@@ -271,7 +283,7 @@ public class Main {
 				root.put("task", t);
 				root.put("stories", dm.getStoriesFromTask(task_id));
 				root.put("published", t.getPublishedAt() != null);
-				
+
 				return render("task_stories.ftl", cfg, root);
 			}
 
@@ -287,21 +299,22 @@ public class Main {
 			}
 
 		});
-		
+
 		get(new Route("/task/:task_id/story/:story_id/delete") {
 			@Override
 			public Object handle(Request request, Response response) {
 
 				int task_id = Integer.parseInt(request.params(":task_id"));
 				int story_id = Integer.parseInt(request.params(":story_id"));
-				
+
 				dm.deleteStory(story_id);
-				
-				response.redirect(String.format("/task/%d/edit/stories", task_id));
+
+				response.redirect(String.format("/task/%d/edit/stories",
+						task_id));
 				return null;
 			}
 		});
-		
+
 		post(new Route("/task/:id/story/add") {
 			@Override
 			public Object handle(Request request, Response response) {
@@ -309,27 +322,29 @@ public class Main {
 				int task_id = Integer.parseInt(request.params(":id"));
 				String story_name = request.queryParams("story_name");
 				String story_desc = request.queryParams("story_description");
-				
-				dm.insertStory(new Story(task_id,story_name,story_desc));
-				
-				response.redirect(String.format("/task/%d/edit/stories", task_id));
+
+				dm.insertStory(new Story(task_id, story_name, story_desc));
+
+				response.redirect(String.format("/task/%d/edit/stories",
+						task_id));
 				return null;
 			}
 		});
-		
+
 		post(new Route("/task/:id/publish") {
 			@Override
 			public Object handle(Request request, Response response) {
 				int task_id = Integer.parseInt(request.params(":id"));
 				Task t = dm.getTask(task_id);
-				t.setPublishedAt(new java.sql.Date(new java.util.Date().getTime()));
+				t.setPublishedAt(new java.sql.Date(new java.util.Date()
+						.getTime()));
 				dm.setTask(t);
-				
+
 				response.redirect("/");
 				return null;
 			}
 		});
-		
+
 		post(new Route("/task/:id/unpublish") {
 			@Override
 			public Object handle(Request request, Response response) {
@@ -337,8 +352,9 @@ public class Main {
 				Task t = dm.getTask(task_id);
 				t.setPublishedAt(null);
 				dm.setTask(t);
-				
-				response.redirect(String.format("/task/%d/edit/stories", task_id));
+
+				response.redirect(String.format("/task/%d/edit/stories",
+						task_id));
 				return null;
 			}
 		});
@@ -386,91 +402,171 @@ public class Main {
 		get(new Route("/task/:task_id/user/:user_id/story/:story_id") {
 			@Override
 			public Object handle(Request request, Response response) {
-				
+
 				int task_id = Integer.parseInt(request.params(":task_id"));
 				int user_id = Integer.parseInt(request.params(":user_id"));
 				int story_id = Integer.parseInt(request.params(":story_id"));
-				
-				// TODO: Calculate consensus divergence and colour code differences
-				List<UserEstimate> latestEstimations = dm.getLatestEstimatesForStory(story_id);
+
+				// TODO: Calculate consensus divergence and colour code
+				// differences
+				List<UserEstimate> latestEstimations = dm
+						.getLatestEstimatesForStory(story_id);
 				int iteration = dm.getLatestIteration(story_id);
-				
-				List<UserEstimate> previousEstimations = dm.getUserEstimatesForStoryWithIteration(story_id, iteration > 0 ? iteration - 1 : iteration);
-				
-				Gson gson = new Gson();  
+
+				List<UserEstimate> previousEstimations = dm
+						.getUserEstimatesForStoryWithIteration(story_id,
+								iteration > 0 ? iteration - 1 : iteration);
+
+				List<UserEstimate> currentEstimations = dm
+						.getUserEstimatesForStoryWithIteration(story_id,
+								iteration);
+
+				Gson gson = new Gson();
 				HashMap<String, String> gmap = new HashMap<String, String>();
-				gmap.put("key1","value1");
-				gmap.put("key2","value2");
-				gmap.put("key3","value3едц\"#¤%&/");
+				gmap.put("key1", "value1");
+				gmap.put("key2", "value2");
+				gmap.put("key3", "value3едц\"#¤%&/");
 				System.out.println(gson.toJson(gmap));
-				
+
 				StringBuilder sb = new StringBuilder();
-				
+
 				if (latestEstimations.size() == 0) {
 					sb.append("can vote");
 				} else {
 					boolean userFound = false;
-					for(UserEstimate ue : latestEstimations) {
+					for (UserEstimate ue : latestEstimations) {
 						if (ue.getUser().getId() == user_id) {
-							userFound = true; 
+							userFound = true;
 						}
 					}
 					if (userFound) {
 						sb.append("can not vote");
+					} else {
+						sb.append("can vote");
 					}
 				}
-				
+
 				sb.append(";");
-				
+
 				// Previous iteration
 				if (iteration > 0) {
 					sb.append("<span class=\"label label-info\">");
-					
+
 					for (UserEstimate userEstimate : previousEstimations) {
-					
-						sb.append(userEstimate.getEstimate().getComplexitySymbol());
+
+						sb.append(userEstimate.getEstimate()
+								.getComplexitySymbol());
 						sb.append(" ");
-					} 
+					}
 					sb.append("</span>");
 				}
-				
+
 				// Next iteration
-				
-				for(UserEstimate ue : latestEstimations) {
+
+				boolean consensus = true;
+				ArrayList<Float> values = new ArrayList<Float>();
+
+				for (UserEstimate ue : latestEstimations) {
+					values.add(ue.getEstimate().getUnitValue());
+
 					sb.append("<button class=\"btn btn-info btn-small\">");
-					sb.append(ue.getEstimate().getComplexitySymbol());
+					// sb.append(ue.getEstimate().getComplexitySymbol());
+					sb.append(ue.getUser().getName());
 					sb.append("</button>");
 				}
-				
-				
-				
+
+				sb.append(";");
+
+				// calculate consensus
+
+				if (dm.getStory(story_id).getConsensus() == NO_CONSENSUS) {
+					System.out
+							.println("Story has no consensus from previous iteration ...");
+
+					if (values.size() == dm.getUsersFromTask(task_id).size()) {
+						System.out
+								.println("Everyone have estimated this story ...");
+						for (int i = 1; i < values.size(); i++) {
+							if (values.get(i - 1) != values.get(i)) {
+								consensus = false;
+							}
+						}
+					} else {
+						consensus = false;
+					}
+
+					if (consensus) {
+						System.out.println("Found consensus");
+						
+						Story s = dm.getStory(story_id);
+						s.setConsensus(latestEstimations.get(1).getEstimate()
+								.getId());
+						dm.setStory(s);
+						
+						sb.append("done");
+					} else {
+						sb.append("not done");
+					}
+				} else {
+					sb.append("done");
+				}
+
+				// float value = values.get(0);
+				// if (dm.getStory(story_id).getConsensus() == NO_CONSENSUS) {
+				// if (values.size() == dm.getUsersFromTask(task_id).size()) {
+				// for (int i = 1; i < values.size(); i++) {
+				// if (!(value == values.get(i))) {
+				// consensus = false;
+				// }
+				// value = values.get(i);
+				// }
+				// } else {
+				// consensus = false;
+				// }
+				//
+				// if (consensus) {
+				// sb.append(";done");
+				// Story s = dm.getStory(story_id);
+				// s.setConsensus(latestEstimations.get(1).getEstimate()
+				// .getId());
+				// dm.setStory(s);
+				// } else {
+				// sb.append(";not done");
+				// }
+				// } else {
+				// sb.append(";done");
+				// }
+
 				return sb.toString();
 			}
 		});
-		
+
 		post(new Route("/task/:task_id/user/:user_id/story/:story_id/ready") {
 			@Override
 			public Object handle(Request request, Response response) {
-				
+
 				int task_id = Integer.parseInt(request.params(":task_id"));
 				int user_id = Integer.parseInt(request.params(":user_id"));
 				int story_id = Integer.parseInt(request.params(":story_id"));
-				int estimate_id = Integer.parseInt(request.queryParams("estimate_id"));
-				
+				int estimate_id = Integer.parseInt(request
+						.queryParams("estimate_id"));
+
 				List<User> usersOnThisTask = dm.getUsersFromTask(task_id);
-				List<UserEstimate> estimatesByUsersThisIteration = dm.getLatestEstimatesForStory(story_id);
+				List<UserEstimate> estimatesByUsersThisIteration = dm
+						.getLatestEstimatesForStory(story_id);
 
 				// If everyone has voted, increase iteration
-				if (estimatesByUsersThisIteration.size() == usersOnThisTask.size() - 1) {
+				if (estimatesByUsersThisIteration.size() == usersOnThisTask
+						.size() - 1) {
 					dm.addEstimateToStory(story_id, user_id, estimate_id);
 					dm.increaseStoryIteration(story_id);
 				} else {
 					dm.addEstimateToStory(story_id, user_id, estimate_id);
 				}
-								
+
 				return "1";
 			}
 		});
-		
+
 	}
 }

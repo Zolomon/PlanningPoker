@@ -61,7 +61,6 @@
 					$("#story-${story.id}-estimate-" + i).addClass("active");
 					//$("#ready-${story.id}").removeClass("disabled");
 				}*/
-				
 
 				var $form = $("#storyform-${story.id}");
 				
@@ -111,10 +110,23 @@
 				console.log("from get: " + data);
 				var substr = data.split(';');
 				$("#story-estimations-${story.id}").html(substr[1]);
-				if (substr[0] === "can vote") {
+					if (substr[0] === "can vote") {
+						var $inputs = $("#storyform-${story.id}").find("button");
+						$inputs.prop("disabled", false);
+					}
+				/*if (substr[2] === "done") {
+					//$("#storyform-${story.id}").parent().parent().remove();
+					//$("#story-estimations-${story.id}").html("<span>Done</span>");
 					var $inputs = $("#storyform-${story.id}").find("button");
-					$inputs.prop("disabled", false);
+						$inputs.prop("disabled", true);
 				}
+				else{
+					$("#story-estimations-${story.id}").html(substr[1]);
+					if (substr[0] === "can vote") {
+						var $inputs = $("#storyform-${story.id}").find("button");
+						$inputs.prop("disabled", false);
+					}
+				}*/
 				//if (data === "can vote") {
 				//	$inputs.prop("disabled", false);	
 				//}

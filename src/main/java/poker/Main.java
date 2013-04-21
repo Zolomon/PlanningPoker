@@ -25,6 +25,7 @@ import poker.entities.Task;
 import poker.entities.UnitType;
 import poker.entities.User;
 import poker.entities.UserEstimate;
+import spark.JettyLogger;
 import spark.Request;
 import spark.Response;
 import spark.Route;
@@ -61,6 +62,8 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws ClassNotFoundException {
+
+		JettyLogger jl = new JettyLogger();
 
 		// SQLite setup section
 		Class.forName("org.sqlite.JDBC");
@@ -432,14 +435,12 @@ public class Main {
 				List<UserEstimate> previousEstimations = dm.getUserEstimatesForStoryWithIteration(story_id,
 						iteration > 0 ? iteration - 1 : iteration);
 
+				if (iteration == 1) {
+					System.out.println("debug!");
+				}
+				
 				Gson gson = new GsonBuilder().create();
 				HashMap<String, String> gmap = new HashMap<String, String>();
-				// gmap.put("key1", "value1");
-				// gmap.put("key2", "value2");
-				// gmap.put("key3", "value3едц\"#¤%&/");
-				// System.out.println(gson.toJson(gmap));
-
-				// StringBuilder sb = new StringBuilder();
 
 				if (latestEstimations.size() == 0) {
 					// sb.append("can vote");
@@ -451,7 +452,7 @@ public class Main {
 							userFound = true;
 						}
 					}
-					
+
 					if (userFound) {
 						gmap.put("vote", "false");
 						// sb.append("can not vote");
@@ -481,7 +482,11 @@ public class Main {
 				boolean consensus = true;
 				ArrayList<Integer> values = new ArrayList<Integer>();
 
-				for (UserEstimate ue : dm.getUserEstimatesForStoryWithIteration(story_id, iteration - 1)) {
+				if(iteration == 1) {
+					System.out.println("debug!");
+				}
+				
+				for (UserEstimate ue : previousEstimations) {
 					values.add(ue.getEstimate().getId());
 				}
 
@@ -516,8 +521,10 @@ public class Main {
 						System.out.println(String.format("Found consensus for story [%d], inner if", story_id));
 
 						Story s = dm.getStory(story_id);
-						s.setConsensus(latestEstimations.get(1).getEstimate().getId());
-						dm.setStory(s);
+						if (previousEstimations.size() > 0) {							
+							s.setConsensus(previousEstimations.get(1).getEstimate().getId());
+							dm.setStory(s);
+						}
 
 						// sb.append("done");
 						gmap.put("consensus", "true");
@@ -532,32 +539,6 @@ public class Main {
 					// sb.append("done");
 					gmap.put("consensus", "true");
 				}
-
-				// float value = values.get(0);
-				// if (dm.getStory(story_id).getConsensus() == NO_CONSENSUS) {
-				// if (values.size() == dm.getUsersFromTask(task_id).size()) {
-				// for (int i = 1; i < values.size(); i++) {
-				// if (!(value == values.get(i))) {
-				// consensus = false;
-				// }
-				// value = values.get(i);
-				// }
-				// } else {
-				// consensus = false;
-				// }
-				//
-				// if (consensus) {
-				// sb.append(";done");
-				// Story s = dm.getStory(story_id);
-				// s.setConsensus(latestEstimations.get(1).getEstimate()
-				// .getId());
-				// dm.setStory(s);
-				// } else {
-				// sb.append(";not done");
-				// }
-				// } else {
-				// sb.append(";done");
-				// }
 
 				System.out.println(gmap);
 				return gson.toJson(gmap);

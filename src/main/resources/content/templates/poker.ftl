@@ -107,14 +107,16 @@
 		
 		setInterval(function() {
 			$.getJSON("/task/${task.id}/user/${user.id}/story/${story.id}", function(data) {
-				console.log("from get: " + data["vote"]+" "+ data["consensus"]  +" " +data["data"]+);
+				console.log("from get: " + data);
 								
 				$("#story-estimations-${story.id}").html(data["data"]);
 				
 				if (data["vote"] === "true") {
-					$("#storyform-${story.id}").find("button").prop("disabled", false);
+					var $inputs = $("#storyform-${story.id}").find("button");
+					$inputs.prop("disabled", false);
 				} else {
 					$("#storyform-${story.id}").find("button").prop("disabled", true);
+					$inputs.prop("disabled", false);
 				}
 			});
 		}, 500);

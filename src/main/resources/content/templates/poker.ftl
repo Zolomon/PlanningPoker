@@ -46,8 +46,8 @@
 
 <script type="text/javascript">
 
-
 	<#list stories as story>
+		var timerId${story.id} = 0;
 		var img${story.id} = '${story.description}';
 		var request${story.id};
 		
@@ -105,7 +105,7 @@
 			 
 		});
 		
-		setInterval(function() {
+		timerId${story.id} = setInterval(function() {
 			$.getJSON("/task/${task.id}/user/${user.id}/story/${story.id}", function(data) {
 				console.log("from get: " + data);
 								
@@ -118,8 +118,26 @@
 					$("#storyform-${story.id}").find("button").prop("disabled", true);
 					$inputs.prop("disabled", false);
 				}
+				
+				if (data["consensus"] === "true") {
+					$("#storyform-${story.id}").parents("tr").hide();
+					$("#story-estimations-${story.id}").parents("tr").hide();					
+					clearInterval(timerId${story.id});
+					timerId${story.id} = -1;
+				}
 			});
 		}, 500);
+		
+		setInterval(function() {
+			
+				if (<#list stories as story> 
+						timerId${story.id} === -1 <#if story_has_next>&&</#if> 
+					</#list>) {
+					window.location.replace("http://localhost:4567/task/${task.id}/summary");
+				} 	
+			
+			
+		}, 333);
 	</#list>
 </script>
 

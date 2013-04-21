@@ -11,6 +11,8 @@ import java.io.Writer;
 import java.lang.ProcessBuilder.Redirect;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -443,7 +445,6 @@ public class Main {
 				HashMap<String, String> gmap = new HashMap<String, String>();
 
 				if (latestEstimations.size() == 0) {
-					// sb.append("can vote");
 					gmap.put("vote", "true");
 				} else {
 					boolean userFound = false;
@@ -455,26 +456,39 @@ public class Main {
 
 					if (userFound) {
 						gmap.put("vote", "false");
-						// sb.append("can not vote");
 					} else {
 						gmap.put("vote", "true");
-						// sb.append("can vote");
 					}
 				}
 
-				// sb.append(";");
 
 				StringBuilder sb = new StringBuilder();
 				// Previous iteration
 				if (iteration > 0) {
-					sb.append("<span class=\"label label-info\">");
 
-					for (UserEstimate userEstimate : previousEstimations) {
+					// Sort estimates
+					class UserComparer implements Comparator<UserEstimate> {
 
-						sb.append(userEstimate.getEstimate().getComplexitySymbol());
-						sb.append(" ");
+						@Override
+						public int compare(UserEstimate lhs, UserEstimate rhs) {
+							int l = lhs.getEstimate().getId();
+							int r = rhs.getEstimate().getId();
+							
+							return l - r;
+						}
+						
 					}
-					sb.append("</span>");
+					
+					Collections.sort(previousEstimations, new UserComparer());
+					
+					
+					// Count 
+					
+					for (UserEstimate userEstimate : previousEstimations) {
+						sb.append("<button disabled class=\"btn\">");
+						sb.append(userEstimate.getEstimate().getComplexitySymbol());
+						sb.append("</button>");
+					}
 				}
 
 				// Next iteration
@@ -492,7 +506,6 @@ public class Main {
 
 				for (UserEstimate ue : latestEstimations) {
 					sb.append("<button class=\"btn btn-info btn-small\">");
-					// sb.append(ue.getEstimate().getComplexitySymbol());
 					sb.append("<i class=\"icon-tasks\">");
 					sb.append("</i> ");
 					sb.append(ue.getUser().getName());
@@ -526,17 +539,14 @@ public class Main {
 							dm.setStory(s);
 						}
 
-						// sb.append("done");
 						gmap.put("consensus", "true");
 					} else {
 						System.out.println(String.format("Did not find consensus for story [%d]", story_id));
 
-						// sb.append("not done");
 						gmap.put("consensus", "false");
 					}
 				} else {
 					System.out.println(String.format("Found consensus for story [%d]", story_id));
-					// sb.append("done");
 					gmap.put("consensus", "true");
 				}
 

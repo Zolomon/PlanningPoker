@@ -27,7 +27,7 @@ import poker.entities.User;
 import poker.entities.UserEstimate;
 
 public class DatabaseManager {
-	private static final String	JDBC_SQLITE_POKER_DB	= "jdbc:sqlite:poker.db";
+	private static final String	JDBC_SQLITE_POKER_DB	= "jdbc:sqlite::memory:";
 	private SimpleDateFormat	dateFormat				= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private OutputStream		debug;
 	private boolean				debugging				= false;
@@ -62,19 +62,6 @@ public class DatabaseManager {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		// finally {
-		// try {
-		// if (connection != null) {
-		// connection.close();
-		// System.out.println("Connection closed.");
-		// }
-		// } catch (Exception e) {
-		// // connection close failed.
-		// System.err.println(e);
-		// }
-		// }
-
-		// connection = null;
 	}
 
 	private void createTables(Connection connection) throws Exception {
@@ -994,7 +981,6 @@ public class DatabaseManager {
 			;
 
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

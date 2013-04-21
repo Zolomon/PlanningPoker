@@ -3,6 +3,7 @@ package poker.entities;
 public class UserEstimate {
 	private User user;
 	private Estimate estimate;
+	private String color;
 
 	public UserEstimate(User user, Estimate estimate) {
 		this.setUser(user);
@@ -23,6 +24,14 @@ public class UserEstimate {
 
 	public void setEstimate(Estimate estimate) {
 		this.estimate = estimate;
+	}
+
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = color;
 	}
 	
 }

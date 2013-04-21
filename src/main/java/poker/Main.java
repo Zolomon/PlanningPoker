@@ -440,7 +440,7 @@ public class Main {
 				if (iteration == 1) {
 					System.out.println("debug!");
 				}
-				
+
 				Gson gson = new GsonBuilder().create();
 				HashMap<String, String> gmap = new HashMap<String, String>();
 
@@ -461,7 +461,6 @@ public class Main {
 					}
 				}
 
-
 				StringBuilder sb = new StringBuilder();
 				// Previous iteration
 				if (iteration > 0) {
@@ -473,19 +472,75 @@ public class Main {
 						public int compare(UserEstimate lhs, UserEstimate rhs) {
 							int l = lhs.getEstimate().getId();
 							int r = rhs.getEstimate().getId();
-							
+
 							return l - r;
 						}
-						
+
 					}
-					
+
+					// Collections.sort(previousEstimations, new
+					// UserComparer());
+
+					// Sort by count
+					class SortByCountComparer implements Comparator<ArrayList<UserEstimate>> {
+
+						@Override
+						public int compare(ArrayList<UserEstimate> lhs, ArrayList<UserEstimate> rhs) {
+							return lhs.size() - rhs.size();
+						}
+
+					}
+
+					HashMap<Integer, ArrayList<UserEstimate>> buckets = new HashMap<Integer, ArrayList<UserEstimate>>();
+
+					for (UserEstimate ue : previousEstimations) {
+						int id = ue.getEstimate().getId();
+						if (buckets.containsKey(id)) {
+							buckets.get(id).add(ue);
+						} else {
+							ArrayList<UserEstimate> estimates = new ArrayList<UserEstimate>();
+							estimates.add(ue);
+							buckets.put(id, estimates);
+						}
+					}
+
+					List<ArrayList<UserEstimate>> estimates = new ArrayList<ArrayList<UserEstimate>>();
+
+					for (Map.Entry<Integer, ArrayList<UserEstimate>> entry : buckets.entrySet()) {
+						estimates.add(entry.getValue());
+					}
+
+					Collections.sort(estimates, new SortByCountComparer());
+
+					// Add color by distance to last element
+					for (int i = 0; i < estimates.size(); i++) {
+						ArrayList<UserEstimate> ues = estimates.get(i);
+						for (int x = 0; x < ues.size(); x++) {
+							UserEstimate e = ues.get(x);
+							// Count
+							switch ((estimates.size() - 1) - i) {
+							case 0:
+								e.setColor("btn-success");
+								break;
+							case 1:
+								e.setColor("btn-warning");
+								break;
+							case 2:
+								e.setColor("btn-danger");
+								break;
+							default:
+								e.setColor("btn-inverse");
+								break;
+							}
+						}
+					}
+
+					// Sort by id
 					Collections.sort(previousEstimations, new UserComparer());
-					
-					
-					// Count 
-					
+
+					// Render
 					for (UserEstimate userEstimate : previousEstimations) {
-						sb.append("<button disabled class=\"btn\">");
+						sb.append("<button disabled class=\"btn " + userEstimate.getColor() + "\">");
 						sb.append(userEstimate.getEstimate().getComplexitySymbol());
 						sb.append("</button>");
 					}
@@ -496,10 +551,10 @@ public class Main {
 				boolean consensus = true;
 				ArrayList<Integer> values = new ArrayList<Integer>();
 
-				if(iteration == 1) {
+				if (iteration == 1) {
 					System.out.println("debug!");
 				}
-				
+
 				for (UserEstimate ue : previousEstimations) {
 					values.add(ue.getEstimate().getId());
 				}
@@ -534,7 +589,7 @@ public class Main {
 						System.out.println(String.format("Found consensus for story [%d], inner if", story_id));
 
 						Story s = dm.getStory(story_id);
-						if (previousEstimations.size() > 0) {							
+						if (previousEstimations.size() > 0) {
 							s.setConsensus(previousEstimations.get(1).getEstimate().getId());
 							dm.setStory(s);
 						}

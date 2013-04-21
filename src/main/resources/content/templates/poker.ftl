@@ -5,7 +5,7 @@
 <div class="row">
 	<div class="pull-left">
 		<table class="table table-condensed table-hover">
-			<tr><td colspan="3">&nbsp;</td></tr>
+		<thead><tr><th>Stories</th><th>Your cards</th><th>Action</th></tr></thead>
 			<#list stories as story>
 				<tr>
 					<td style="padding: 9px 9px;"><a href="#" id="story-${story.id}">${story.name}</a></td>
@@ -27,14 +27,10 @@
 	</div>
 	<div class="pull-left">
 		<table class="table table-condensed table-hover">
-			<tr>
-				<#list users as user>
-					<td><a href="#" class="" id="user-${user.id}">${user.name}</a></td>
-				</#list>
-			</tr>
+		<thead><tr><th>Previous iteration</th><th>Who has voted now?</th></tr></thead>
 			<#list stories as story>
 				<tr>
-					<td colspan="${users?size}"><div id="story-estimations-${story.id}"></div></td>
+					<td colspan="${users?size}" style="height: 30px"><div id="story-estimations-${story.id}"></div></td>
 				</tr>
 			</#list>
 		</table>			
@@ -47,6 +43,9 @@
 <script type="text/javascript">
 
 	<#list stories as story>
+		var img${story.id} = '${story.description}';
+
+		$("#story-${story.id}").popover({ title: 'Story Description', content: img${story.id}, placement: 'right', animation: true, trigger:'hover', delay: {show:333, hide:100} });
 		var timerId${story.id} = 0;
 		var img${story.id} = '${story.description}';
 		var request${story.id};
@@ -102,9 +101,11 @@
 		timerId${story.id} = setInterval(function() {
 			$.getJSON("/task/${task.id}/user/${user.id}/story/${story.id}", function(data) {
 				//console.log("from get: " + data);
-								
+						
 				$("#story-estimations-${story.id}").html(data["data"]);
-				
+				<#list users as usr>
+					$("#user-${story.id}-${usr.id}").tooltip({ title: '${usr.name}', placement: 'top', animation: true, trigger:'hover', delay: {show:0, hide:5000} });
+				</#list>
 				if (data["vote"] === "true") {
 					var $inputs = $("#storyform-${story.id}").find("button");
 					$inputs.prop("disabled", false);

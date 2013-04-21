@@ -229,10 +229,10 @@ public class Main {
 				Map<String, Object> root = new HashMap<String, Object>();
 				int task_id = Integer.parseInt(request.params(":id"));
 				root.put("task", dm.getTask(task_id));
-				List<Estimate> estimations =dm.getEstimationsForTask(task_id); 
+				List<Estimate> estimations = dm.getEstimationsForTask(task_id);
 				root.put("complexities", estimations);
 				root.put("unit_id", estimations.get(0).getUnit().getCode());
-				
+
 				return render("task_estimations.ftl", cfg, root);
 			}
 
@@ -551,16 +551,16 @@ public class Main {
 							// Count
 							switch ((estimates.size() - 1) - i) {
 							case 0:
-								e.setColor("btn-success");
+								e.setColor("label-success");
 								break;
 							case 1:
-								e.setColor("btn-warning");
+								e.setColor("label-warning");
 								break;
 							case 2:
-								e.setColor("btn-danger");
+								e.setColor("label-danger");
 								break;
 							default:
-								e.setColor("btn-inverse");
+								e.setColor("label-inverse");
 								break;
 							}
 						}
@@ -571,11 +571,12 @@ public class Main {
 
 					// Render
 					for (UserEstimate userEstimate : previousEstimations) {
-						sb.append("<button disabled class=\"btn " + userEstimate.getColor() + "\">");
+						sb.append("<span id=\"user-"+story_id+"-" + userEstimate.getUser().getId() + "\" class=\"label "
+								+ userEstimate.getColor() + "\" style=\"font-size: 100%; padding:8px; text-align:center; vertical-align:middle;\">");
 						sb.append("<strong>");
 						sb.append(userEstimate.getEstimate().getComplexitySymbol());
 						sb.append("</strong>");
-						sb.append("</button>");
+						sb.append("</span>");
 					}
 				}
 

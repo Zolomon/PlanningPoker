@@ -35,7 +35,6 @@
           <div class="nav-collapse collapse">
             <ul class="nav">
               <li class="active"><a href="/">Tasks</a></li>
-              <li><a href="#about">Your Story</a></li>
               <li><a href="https://github.com/Zolomon/PlanningPoker/">GitHub</a></li>
             </ul>
           </div><!--/.nav-collapse -->
@@ -47,7 +46,17 @@
 	
 	<div class="container">
 		<#nested/>
+		
+		<br />
+		<br />
+		<br />
+		<div class="row">
+			<div class="span12">
+					<p class="text-center muted"><small>Created by <strong>Soheil Afghani Khorasgani</strong>, <strong>Bengt Ericsson</strong>, <strong>Anders Holmberg</strong>, <strong>Daniel Lundell</strong>, <strong>Alexander Pieta Theofanous</strong>.</small></p>   
+			</div>
+		</div>
 	</div><!--/.container-->
+	
 	
 	<!-- footer section -->
 	<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>

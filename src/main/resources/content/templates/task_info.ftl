@@ -26,10 +26,10 @@
 		</#if>
 			<fieldset>
 				<legend>Task Info</legend>
-				<label>Task name</label>
+				<label>Task Name</label>
 				<input type="text" name="task_name" value="${task.name}" placeholder="Enter task name here..." class="span4"><br><br>
 				
-				<label>Task description</label>
+				<label>Task Description</label>
 				<textarea  rows="5" name="task_description" placeholder="Enter task description here..." class="span4">${task.description}</textarea><br><br>
 				
 				<#if !edit>
@@ -51,7 +51,7 @@
 		
 			<fieldset>
 				<legend>Create a new user</legend>
-				<label>User name</label>
+				<label>User Name</label>
 				<input type="text" name="user_name" placeholder="Enter user name here..." class="input-large pull-left">
 				<button type="submit" action="user_add" class="btn btn-primary inline pull-right"><i class="icon-ok-sign icon-white"></i> <i class="icon-user icon-white"></i> Create new user</button>
 			</fieldset>
@@ -74,7 +74,7 @@
 		<thead><tr><th>Users</th></tr></thead>
 			<tr>
 				<#list task_users as user>
-					<td><a class="btn btn-danger btn-mini pull-right" href="/task/${task.id}/edit/user/${user.id}/remove"><i class="icon-minus-sign icon-white"></i> Remove ${user.name}</a></td>
+					<td><a class="btn btn-danger btn-mini pull-right" href="/task/${task.id}/edit/user/${user.id}/remove"><i class="icon-minus-sign icon-white"></i> Remove <strong>${user.name}</strong></a></td>
 				</#list>
 			</tr>
 		</table>

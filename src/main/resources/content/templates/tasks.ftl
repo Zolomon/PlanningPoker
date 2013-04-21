@@ -14,7 +14,7 @@
 					<a href="/task/<#noescape>${task.id}</#noescape>/summary" class="btn btn-mini btn-info"><i class="icon-info-sign icon-white"></i> Summary</a>
 				</td>
 				<td>
-					<a href="/task/<#noescape>${task.id}</#noescape>/edit/info">${task.name}</a>
+					<a href="/task/<#noescape>${task.id}</#noescape>/edit/info" id="task-title-${task.id}">${task.name}</a>
 					
 					<#if !task.isPublished()>
 						<small>(unpublished)</small>
@@ -30,7 +30,7 @@
 				<td colspan="2">
 				<#if task.isPublished()>
 					<#list task.users as user>
-						<a class="btn btn-primary btn-mini" href="/poker/<#noescape>${task.id}</#noescape>/<#noescape>${user.id}</#noescape>"><i class="icon-play icon-white"></i>&nbsp;&nbsp;${user.name}</a>
+						<a class="btn btn-primary btn-mini" href="/poker/<#noescape>${task.id}</#noescape>/<#noescape>${user.id}</#noescape>"><i class="icon-play icon-white"></i>&nbsp;&nbsp;<strong>${user.name}</strong></a>
 					</#list>
 				</td>
 				</#if>
@@ -48,5 +48,15 @@
 	</div>
 </div>
 
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script src="http://localhost:4567/js/bootstrap.js"></script>
+<script type="text/javascript">
+	<#list tasks as task>
+		var img${task.id} = '${task.description}';
+
+		$("#task-title-${task.id}").popover({ title: 'Task Description', content: img${task.id}, placement: 'right', animation: true, trigger:'hover', delay: {show:333, hide:100} });
+	
+	</#list>
+</script>
 
 </@c.page>

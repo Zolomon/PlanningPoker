@@ -18,10 +18,10 @@
 			<input name="task_id" type="hidden" value="<#noescape>${task.id}</#noescape>">
 			<label>Select estimation unit</label>
 			<select id="estimation_unit" name="estimation_unit">
-			  <option vaule="1">Person Hours</option>
-			  <option vaule="2">Person Days</option>
-			  <option vaule="3">Person Months</option>
-			  <option vaule="4">Person Years</option>
+			  <option value="1" <#if unit_id == 1>selected</#if>>Person Hours</option>
+			  <option value="2" <#if unit_id == 2>selected</#if>>Person Days</option>
+			  <option value="3" <#if unit_id == 3>selected</#if>>Person Months</option>
+			  <option value="4" <#if unit_id == 4>selected</#if>>Person Years</option>
 			</select>
 				<br/><br/>
 			<label>Assign the worth of each complexity value</label>
@@ -33,9 +33,7 @@
 				</tr>
 				<tr>
 				<#list complexities as complexity>
-					<#escape x as x?html>
-					<td><input class="input-mini" type="text" name="complexity-<#noescape>${complexity.id}</#noescape>" placeholder="<#noescape>${complexity.unitValue}</#noescape>"></td>
-					</#escape>
+					<td><input class="input-mini" type="text" name="complexity-${complexity.id}" placeholder="${complexity.unitValue}"></td>
 				</#list>
 				</tr>
 			</table>		

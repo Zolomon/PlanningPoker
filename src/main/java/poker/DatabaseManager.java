@@ -723,7 +723,7 @@ public class DatabaseManager {
 
 			while (res.next()) {
 				estimate = new Estimate(res.getInt("id"), res.getInt("task_id"), res.getString("complexity_symbol"),
-						UnitType.values()[res.getInt("unit") - 1], res.getInt("unit_value"));
+						UnitType.values()[res.getInt("unit") - 1], res.getFloat("unit_value"));
 				debug("Fetching estimate: " + estimate.toString());
 				estimations.add(estimate);
 			}

@@ -108,6 +108,7 @@
 				if (data["vote"] === "true") {
 					var $inputs = $("#storyform-${story.id}").find("button");
 					$inputs.prop("disabled", false);
+					
 				} else {
 					$("#storyform-${story.id}").find("button").prop("disabled", true);
 					$inputs.prop("disabled", false);

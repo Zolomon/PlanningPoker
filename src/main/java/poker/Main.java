@@ -229,8 +229,10 @@ public class Main {
 				Map<String, Object> root = new HashMap<String, Object>();
 				int task_id = Integer.parseInt(request.params(":id"));
 				root.put("task", dm.getTask(task_id));
-				root.put("complexities", dm.getEstimationsForTask(task_id));
-
+				List<Estimate> estimations =dm.getEstimationsForTask(task_id); 
+				root.put("complexities", estimations);
+				root.put("unit_id", estimations.get(0).getUnit().getCode());
+				
 				return render("task_estimations.ftl", cfg, root);
 			}
 
@@ -242,13 +244,7 @@ public class Main {
 			public Object handle(Request request, Response response) {
 				int task_id = Integer.parseInt(request.params(":id"));
 
-				int unit = 1;
-				if (request.queryParams("estimation_unit").toLowerCase().equals("person days"))
-					unit = 2;
-				if (request.queryParams("estimation_unit").toLowerCase().equals("person months"))
-					unit = 3;
-				if (request.queryParams("estimation_unit").toLowerCase().equals("person years"))
-					unit = 4;
+				int unit = Integer.parseInt(request.queryParams("estimation_unit"));
 
 				List<Estimate> task_estimations = dm.getEstimationsForTask(task_id);
 
@@ -576,7 +572,9 @@ public class Main {
 					// Render
 					for (UserEstimate userEstimate : previousEstimations) {
 						sb.append("<button disabled class=\"btn " + userEstimate.getColor() + "\">");
+						sb.append("<strong>");
 						sb.append(userEstimate.getEstimate().getComplexitySymbol());
+						sb.append("</strong>");
 						sb.append("</button>");
 					}
 				}
@@ -598,7 +596,9 @@ public class Main {
 					sb.append("<button class=\"btn btn-info btn-small\">");
 					sb.append("<i class=\"icon-tasks\">");
 					sb.append("</i> ");
+					sb.append("<strong>");
 					sb.append(ue.getUser().getName());
+					sb.append("</strong>");
 					sb.append("</button>");
 				}
 

@@ -51,27 +51,21 @@
 		var img${story.id} = '${story.description}';
 		var request${story.id};
 		
-		//$("#story-${story.id}").popover({ title: 'Story description', content: img${story.id}, placement: 'left', animation: true, trigger:'hover', delay: {show:333, hide:100} });
 		
-		for(var i = 0; i < ${estimations?size}; i++) {
-			$("#story-${story.id}-estimate-" + i).click(function() {
-				/*if($("#story-${story.id}-estimate-" + i).hasClass("active")) {
-					//$("#ready-${story.id}").addClass("disabled");
-				} else if (!$("#story-${story.id}-estimate-" + i).hasClass("active")) {
-					$("#story-${story.id}-estimate-" + i).addClass("active");
-					//$("#ready-${story.id}").removeClass("disabled");
-				}*/
+		<#list estimations as estimate>
+			$("#story-${story.id}-estimate-${estimate.id}").click(function() {
 
 				var $form = $("#storyform-${story.id}");
 				
 				if ($form.find("button.active").length > 0) {
 					$("#ready-${story.id}").prop("disabled", false);
+					console.log("found active button");
 				} else {
 					$("#ready-${story.id}").prop("disabled", false);
+					console.log("didn't find active button");
 				}
-								
 			});
-		}
+		</#list>
 		
 		$("#ready-${story.id}").click(function() {
 			// Abort any pending request
@@ -107,7 +101,7 @@
 		
 		timerId${story.id} = setInterval(function() {
 			$.getJSON("/task/${task.id}/user/${user.id}/story/${story.id}", function(data) {
-				console.log("from get: " + data);
+				//console.log("from get: " + data);
 								
 				$("#story-estimations-${story.id}").html(data["data"]);
 				

@@ -360,18 +360,27 @@ public class Main {
 			public Object handle(Request request, Response response) {
 
 				int task_id = Integer.parseInt(request.params(":id"));
+				List<Estimate> estimates = dm.getEstimationsForTask(task_id);
 
-				Map<String, Object> root = new HashMap<String, Object>();
-				root.put("id", task_id);
+				response.redirect(String.format("/task/%d/summary/unit/%d", task_id, estimates.get(0).getUnit()
+						.getCode()));
+				return null;				
+			}
+		});
+		
+		post(new Route("/task/:id/summary") {
+			@Override
+			public Object handle(Request request, Response response) {
 
-				List<StoryEstimate> stories = new ArrayList<StoryEstimate>();
-				for (Story s : dm.getStoriesFromTask(task_id)) {
-					stories.add(new StoryEstimate(s, (s.getConsensus() == -1 ? 0 : dm.getEstimate(s.getConsensus())
-							.getUnitValue())));
+				int task_id = Integer.parseInt(request.params(":id"));
+				if (request.queryParams().contains("estimation_unit")) {
+					
 				}
-				root.put("stories", stories);
+				List<Estimate> estimates = dm.getEstimationsForTask(task_id);
 
-				return render("task_summary.ftl", cfg, root);
+				response.redirect(String.format("/task/%d/summary/unit/%d", task_id, estimates.get(0).getUnit()
+						.getCode()));
+				return null;				
 			}
 		});
 
@@ -387,11 +396,22 @@ public class Main {
 
 				List<StoryEstimate> stories = new ArrayList<StoryEstimate>();
 				for (Story s : dm.getStoriesFromTask(task_id)) {
-					stories.add(new StoryEstimate(s, s.getConsensus() == -1 ? 0 : dm.getEstimate(s.getConsensus())
-							.getUnitValue()));
+					int consensus_id = s.getConsensus();
+					float result = 0;
+					String complexity = "";
+
+					if (consensus_id != NO_CONSENSUS) {
+						Estimate e = dm.getEstimate(consensus_id);
+						if (e.getUnitValue() != -1)
+							result = e.getUnitValue(UnitType.values()[unit_id-1]);
+						complexity = e.getComplexitySymbol();
+					}
+
+					stories.add(new StoryEstimate(s, result, String.format("%s", complexity)));
 				}
 
 				root.put("stories", stories);
+				root.put("unit_id", unit_id);
 
 				return render("task_summary.ftl", cfg, root);
 			}

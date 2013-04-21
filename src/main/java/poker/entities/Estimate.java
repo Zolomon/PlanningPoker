@@ -3,7 +3,7 @@ package poker.entities;
 public class Estimate {
 	private static final int WORK_DAYS_PER_YEAR = 165;
 	private static final int WORK_DAYS_PER_MONTH = 22;
-	private static final int WORK_HOURS_PER_DAY = 24;
+	private static final int WORK_HOURS_PER_DAY = 8;
 	private int id;
 	private int task_id;
 	private String complexity_symbol;

@@ -77,6 +77,9 @@ public class Story {
 		this.description = description;
 	}
 
+	/***
+	 * @return The database ID for the estimate that is this story's final consensus.
+	 */
 	public int getConsensus() {
 		return consensus;
 	}

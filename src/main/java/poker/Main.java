@@ -355,6 +355,19 @@ public class Main {
 			}
 		});
 
+		get(new Route("/task/:task_id/delete/") {
+			@Override
+			public Object handle(Request request, Response response) {
+
+				int task_id = Integer.parseInt(request.params(":task_id"));
+
+				dm.deleteTask(task_id);
+
+				response.redirect("/tasks", 302);
+				return null;
+			}
+		});
+
 		get(new Route("/task/:id/summary") {
 			@Override
 			public Object handle(Request request, Response response) {

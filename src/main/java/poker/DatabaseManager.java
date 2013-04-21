@@ -223,11 +223,12 @@ public class DatabaseManager {
 		try {
 
 			PreparedStatement ps = connection
-					.prepareStatement("UPDATE tasks set name=?, created_at=?, published_at=? where id=?");
+					.prepareStatement("UPDATE tasks set name=?, description=?, created_at=?, published_at=? where id=?");
 			ps.setString(1, task.getName());
-			ps.setDate(2, task.getCreatedAt());
-			ps.setDate(3, task.getPublishedAt());
-			ps.setInt(4, task.getId());
+			ps.setString(2, task.getDescription());
+			ps.setDate(3, task.getCreatedAt());
+			ps.setDate(4, task.getPublishedAt());
+			ps.setInt(5, task.getId());
 
 			// debug("Setting task: " + task.toString());
 

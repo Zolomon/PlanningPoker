@@ -27,7 +27,7 @@ import poker.entities.User;
 import poker.entities.UserEstimate;
 
 public class DatabaseManager {
-	private static final String	JDBC_SQLITE_POKER_DB	= "jdbc:sqlite::memory:";
+	private static final String	JDBC_SQLITE_POKER_DB	= "jdbc:sqlite:poker.db";
 	private SimpleDateFormat	dateFormat				= new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private OutputStream		debug;
 	private boolean				debugging				= false;
@@ -203,14 +203,12 @@ public class DatabaseManager {
 							new java.sql.Date(dateFormat.parse(res.getString("datetime(created_at)")).getTime()),
 							(res.getString("datetime(published_at)")) == null ? null : new java.sql.Date(dateFormat
 									.parse(res.getString("datetime(published_at)")).getTime()));
-					// debug("Fetching task: " + task.toString());
+					debug("Fetching task: " + task.toString());
 				} catch (ParseException e) {
 					System.err.println("Error parsing tasks.created_at using task id: " + res.getInt("id"));
 					e.printStackTrace();
 				}
 			}
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -230,11 +228,9 @@ public class DatabaseManager {
 			ps.setDate(4, task.getPublishedAt());
 			ps.setInt(5, task.getId());
 
-			// debug("Setting task: " + task.toString());
+			debug("Setting task: " + task.toString());
 
 			ps.executeUpdate();
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -249,11 +245,9 @@ public class DatabaseManager {
 			ps.setString(1, task.getName());
 			ps.setString(2, task.getDescription());
 
-			// debug("Inserting task: " + task.toString());
+			debug("Inserting task: " + task.toString());
 
 			ps.executeUpdate();
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -280,11 +274,9 @@ public class DatabaseManager {
 			PreparedStatement ps = connection.prepareStatement("DELETE FROM tasks where id=?");
 			ps.setInt(1, id);
 
-			// debug("Deleting task id: " + id);
+			debug("Deleting task id: " + id);
 
 			ps.executeUpdate();
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -306,10 +298,8 @@ public class DatabaseManager {
 				story = new Story(res.getInt("id"), res.getInt("task_id"), res.getString("name"),
 						res.getString("description"), res.getInt("consensus"), res.getInt("iteration"));
 
-				// debug("Fetching story: " + story.toString());
+				debug("Fetching story: " + story.toString());
 			}
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -329,11 +319,9 @@ public class DatabaseManager {
 			ps.setInt(4, story.getIteration());
 			ps.setInt(5, story.getId());
 
-			// debug("Setting story: " + story.toString());
+			debug("Setting story: " + story.toString());
 
 			ps.executeUpdate();
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -350,11 +338,9 @@ public class DatabaseManager {
 			ps.setString(2, story.getName());
 			ps.setString(3, story.getDescription());
 
-			// debug("Insering story: " + story.toString());
+			debug("Insering story: " + story.toString());
 
 			ps.executeUpdate();
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -380,12 +366,10 @@ public class DatabaseManager {
 
 			Statement ps = connection.createStatement();
 			if (ps.execute("DELETE FROM stories WHERE id=" + id)) {
-				// debug("deleted story " + id + " successfully");
+				debug("deleted story " + id + " successfully");
 			}
 
-			// debug("Deleting story with id: " + id);
-
-			;
+			debug("Deleting story with id: " + id);
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -404,10 +388,8 @@ public class DatabaseManager {
 
 			while (res.next()) {
 				user = new User(res.getInt("id"), res.getString("name"));
-				// debug("Fetching user: " + user.toString());
+				debug("Fetching user: " + user.toString());
 			}
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -422,11 +404,9 @@ public class DatabaseManager {
 			PreparedStatement ps = connection.prepareStatement("INSERT into users (name) values (?)");
 			ps.setString(1, user.getName());
 
-			// debug("Inserting user: " + user.toString());
+			debug("Inserting user: " + user.toString());
 
 			ps.executeUpdate();
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -441,7 +421,7 @@ public class DatabaseManager {
 			PreparedStatement ps = connection.prepareStatement("DELETE FROM task_team where user_id=?");
 			ps.setInt(1, id);
 
-			// debug("Deleting user from all tasks: " + id);
+			debug("Deleting user from all tasks: " + id);
 
 			ps.executeUpdate();
 
@@ -449,7 +429,7 @@ public class DatabaseManager {
 			ps = connection.prepareStatement("DELETE FROM story_user_estimations where user_id=?");
 			ps.setInt(1, id);
 
-			// debug("Deleting all estimations for user: " + id);
+			debug("Deleting all estimations for user: " + id);
 
 			ps.executeUpdate();
 
@@ -457,11 +437,9 @@ public class DatabaseManager {
 			ps = connection.prepareStatement("DELETE FROM users where id=?");
 			ps.setInt(1, id);
 
-			// debug("Deleting user with id: " + id);
+			debug("Deleting user with id: " + id);
 
 			ps.executeUpdate();
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -476,11 +454,9 @@ public class DatabaseManager {
 			ps.setString(1, user.getName());
 			ps.setInt(2, user.getId());
 
-			// debug("Setting user: " + user.toString());
+			debug("Setting user: " + user.toString());
 
 			ps.executeUpdate();
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -500,11 +476,9 @@ public class DatabaseManager {
 
 			while (res.next()) {
 				estimate = new Estimate(res.getInt("id"), res.getInt("task_id"), res.getString("complexity_symbol"),
-						UnitType.values()[res.getInt("unit")], res.getInt("unit_value"));
-				// debug("Fetching estimate: " + estimate.toString());
+						UnitType.values()[res.getInt("unit") - 1], res.getFloat("unit_value"));
+				debug("Fetching estimate: " + estimate.toString());
 			}
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -523,11 +497,9 @@ public class DatabaseManager {
 			ps.setFloat(3, estimate.getUnitValue());
 			ps.setInt(4, estimate.getId());
 
-			// debug("Setting estimate: " + estimate.toString());
+			debug("Setting estimate: " + estimate.toString());
 
 			ps.executeUpdate();
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -545,11 +517,9 @@ public class DatabaseManager {
 			ps.setInt(3, estimate.getUnit().getCode());
 			ps.setFloat(4, estimate.getUnitValue());
 
-			// debug("Inserting estimate: " + estimate.toString());
+			debug("Inserting estimate: " + estimate.toString());
 
 			ps.executeUpdate();
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -563,10 +533,8 @@ public class DatabaseManager {
 			PreparedStatement ps = connection.prepareStatement("DELETE FROM estimations where id=?");
 			ps.setInt(1, id);
 
-			// debug("Deleting estimate with id: " + id);
+			debug("Deleting estimate with id: " + id);
 			ps.executeUpdate();
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -590,10 +558,8 @@ public class DatabaseManager {
 				story = new Story(res.getInt("id"), res.getInt("task_id"), res.getString("name"),
 						res.getString("description"), res.getInt("consensus"), res.getInt("iteration"));
 				stories.add(story);
-				// debug("Fetching story: " + story.toString());
+				debug("Fetching story: " + story.toString());
 			}
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -617,10 +583,8 @@ public class DatabaseManager {
 			while (res.next()) {
 				user = new User(res.getInt("id"), res.getString("name"));
 				users.add(user);
-				// debug("Fetching user: " + user.toString());
+				debug("Fetching user: " + user.toString());
 			}
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -642,8 +606,6 @@ public class DatabaseManager {
 			for (User user : users) {
 				storyEstimations.put(user, getEstimatesFromUser(user.getId()));
 			}
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -669,11 +631,9 @@ public class DatabaseManager {
 			while (res.next()) {
 				estimate = new Estimate(res.getInt("id"), res.getInt("task_id"), res.getString("complexity_symbol"),
 						UnitType.values()[res.getInt("unit")], res.getInt("unit_value"));
-				// debug("Fetching estimate: " + estimate.toString());
+				debug("Fetching estimate: " + estimate.toString());
 				estimations.add(estimate);
 			}
-
-			;
 
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -690,10 +650,8 @@ public class DatabaseManager {
 			ps.setInt(1, story_id);
 			ps.setInt(2, estimate_id);
 
-			//debug(String.format("Deleting estimate [%d] from story [%d]", estimate_id, story_id));
+			debug(String.format("Deleting estimate [%d] from story [%d]", estimate_id, story_id));
 			ps.executeUpdate();
-
-			;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -707,10 +665,8 @@ public class DatabaseManager {
 			ps.setInt(1, task_id);
 			ps.setInt(2, user_id);
 
-			//debug(String.format("Deleting user [%d] from task [%d]", user_id, task_id));
+			debug(String.format("Deleting user [%d] from task [%d]", user_id, task_id));
 			ps.executeUpdate();
-
-			;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -724,10 +680,8 @@ public class DatabaseManager {
 			ps.setInt(1, user_id);
 			ps.setInt(2, task_id);
 
-			// debug("Adding user [" + user_id + "] to task [" + task_id + "]");
+			debug("Adding user [" + user_id + "] to task [" + task_id + "]");
 			ps.executeUpdate();
-
-			;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -744,11 +698,8 @@ public class DatabaseManager {
 			ps.setInt(3, estimate_id);
 			ps.setInt(4, getStory(story_id).getIteration());
 
-			// debug("Adding estimate [" + estimate_id + "] to story [" +
-			// story_id + "] for user [" + user_id + "]");
+			debug("Adding estimate [" + estimate_id + "] to story [" + story_id + "] for user [" + user_id + "]");
 			ps.executeUpdate();
-
-			;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -764,7 +715,7 @@ public class DatabaseManager {
 					.prepareStatement("SELECT id, task_id, complexity_symbol, unit, unit_value from estimations where task_id = ? ");
 			ps.setInt(1, task_id);
 
-			// debug("Fetching estimations for task with id: " + task_id);
+			debug("Fetching estimations for task with id: " + task_id);
 
 			Estimate estimate = null;
 
@@ -773,11 +724,9 @@ public class DatabaseManager {
 			while (res.next()) {
 				estimate = new Estimate(res.getInt("id"), res.getInt("task_id"), res.getString("complexity_symbol"),
 						UnitType.values()[res.getInt("unit") - 1], res.getInt("unit_value"));
-				// debug("Fetching estimate: " + estimate.toString());
+				debug("Fetching estimate: " + estimate.toString());
 				estimations.add(estimate);
 			}
-
-			;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -792,13 +741,12 @@ public class DatabaseManager {
 
 			PreparedStatement ps = connection.prepareStatement("SELECT id from tasks ORDER BY id ASC");
 
-			// debug("Getting all tasks");
+			debug("Getting all tasks");
 
 			ResultSet res = ps.executeQuery();
 			while (res.next()) {
 				tasks.add(getTask(res.getInt("id")));
 			}
-			;
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -817,10 +765,9 @@ public class DatabaseManager {
 
 			ResultSet res = ps.executeQuery();
 			while (res.next()) {
-				//debug(String.format("Getting newest task [%d]", res.getInt("id")));
+				debug(String.format("Getting newest task [%d]", res.getInt("id")));
 				id = res.getInt("id");
 			}
-			;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -837,10 +784,9 @@ public class DatabaseManager {
 
 			ResultSet res = ps.executeQuery();
 			while (res.next()) {
-				//debug(String.format("Getting newest story [%d]", res.getInt("id")));
+				debug(String.format("Getting newest story [%d]", res.getInt("id")));
 				id = res.getInt("id");
 			}
-			;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -857,10 +803,9 @@ public class DatabaseManager {
 
 			ResultSet res = ps.executeQuery();
 			while (res.next()) {
-				//debug(String.format("Getting newest user [%d]", res.getInt("id")));
+				debug(String.format("Getting newest user [%d]", res.getInt("id")));
 				id = res.getInt("id");
 			}
-			;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -877,10 +822,9 @@ public class DatabaseManager {
 
 			ResultSet res = ps.executeQuery();
 			while (res.next()) {
-				//debug(String.format("Getting newest estimate [%d]", res.getInt("id")));
+				debug(String.format("Getting newest estimate [%d]", res.getInt("id")));
 				id = res.getInt("id");
 			}
-			;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -896,15 +840,13 @@ public class DatabaseManager {
 			PreparedStatement ps = connection.prepareStatement("SELECT iteration FROM stories WHERE id=?");
 			ps.setInt(1, story_id);
 
-			//debug(String.format("Fetching latest iteration for story [%d]", story_id));
+			debug(String.format("Fetching latest iteration for story [%d]", story_id));
 
 			ResultSet res = ps.executeQuery();
 
 			while (res.next()) {
 				iteration = res.getInt("iteration");
 			}
-
-			;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -922,7 +864,7 @@ public class DatabaseManager {
 			ps.setInt(1, story_id);
 			ps.setInt(2, story_id);
 
-			//debug(String.format("Increasing iteration for story [%d]", story_id));
+			debug(String.format("Increasing iteration for story [%d]", story_id));
 
 			ps.executeUpdate();
 		} catch (Exception e1) {
@@ -941,7 +883,7 @@ public class DatabaseManager {
 			ps.setInt(1, story_id);
 			ps.setInt(2, iteration);
 
-			//debug(String.format("Fetching user estimates from story [%d] with iteration [%d]", story_id, iteration));
+			debug(String.format("Fetching user estimates from story [%d] with iteration [%d]", story_id, iteration));
 
 			Estimate estimate = null;
 			User user = null;
@@ -954,8 +896,6 @@ public class DatabaseManager {
 
 				estimations.add(new UserEstimate(user, estimate));
 			}
-
-			;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -973,14 +913,12 @@ public class DatabaseManager {
 
 			PreparedStatement ps = connection.prepareStatement("SELECT id from users ORDER BY id ASC");
 
-			// debug("Getting all users");
+			debug("Getting all users");
 
 			ResultSet res = ps.executeQuery();
 			while (res.next()) {
 				users.add(getUser(res.getInt("id")));
 			}
-			;
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

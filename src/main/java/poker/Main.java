@@ -10,6 +10,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.lang.ProcessBuilder.Redirect;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -377,23 +378,19 @@ public class Main {
 
 				response.redirect(String.format("/task/%d/summary/unit/%d", task_id, estimates.get(0).getUnit()
 						.getCode()));
-				return null;				
+				return null;
 			}
 		});
-		
+
 		post(new Route("/task/:id/summary") {
 			@Override
 			public Object handle(Request request, Response response) {
 
 				int task_id = Integer.parseInt(request.params(":id"));
-				if (request.queryParams().contains("estimation_unit")) {
-					
-				}
-				List<Estimate> estimates = dm.getEstimationsForTask(task_id);
+				int estimation_unit = Integer.parseInt(request.queryParams("estimation_unit"));
 
-				response.redirect(String.format("/task/%d/summary/unit/%d", task_id, estimates.get(0).getUnit()
-						.getCode()));
-				return null;				
+				response.redirect(String.format("/task/%d/summary/unit/%d", task_id, estimation_unit));
+				return null;
 			}
 		});
 
@@ -407,24 +404,29 @@ public class Main {
 				Map<String, Object> root = new HashMap<String, Object>();
 				root.put("id", task_id);
 
+				float total = 0;
+
 				List<StoryEstimate> stories = new ArrayList<StoryEstimate>();
 				for (Story s : dm.getStoriesFromTask(task_id)) {
 					int consensus_id = s.getConsensus();
-					float result = 0;
+					float result = -1;
 					String complexity = "";
 
 					if (consensus_id != NO_CONSENSUS) {
 						Estimate e = dm.getEstimate(consensus_id);
-						if (e.getUnitValue() != -1)
-							result = e.getUnitValue(UnitType.values()[unit_id-1]);
+						if (e.getUnitValue() != -1) {
+							result = e.getUnitValue(UnitType.values()[unit_id - 1]);
+							total += result;
+						}
 						complexity = e.getComplexitySymbol();
 					}
-
-					stories.add(new StoryEstimate(s, result, String.format("%s", complexity)));
+					stories.add(new StoryEstimate(s, new DecimalFormat("#.##").format(result), String.format("%s",
+							complexity)));
 				}
 
 				root.put("stories", stories);
 				root.put("unit_id", unit_id);
+				root.put("total", new DecimalFormat("#.##").format(total));
 
 				return render("task_summary.ftl", cfg, root);
 			}

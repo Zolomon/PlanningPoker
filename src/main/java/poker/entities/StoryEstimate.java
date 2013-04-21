@@ -2,10 +2,10 @@ package poker.entities;
 
 public class StoryEstimate {
 	private Story	story;
-	private float	estimate;
+	private String	estimate;
 	private String	complexityString;
 
-	public StoryEstimate(Story story, float estimate, String complexityString) {
+	public StoryEstimate(Story story, String estimate, String complexityString) {
 		this.setStory(story);
 		this.setEstimate(estimate);
 		this.setComplexityString(complexityString);
@@ -19,11 +19,11 @@ public class StoryEstimate {
 		this.story = story;
 	}
 
-	public float getEstimate() {
+	public String getEstimate() {
 		return estimate;
 	}
 
-	public void setEstimate(float estimate) {
+	public void setEstimate(String estimate) {
 		this.estimate = estimate;
 	}
 

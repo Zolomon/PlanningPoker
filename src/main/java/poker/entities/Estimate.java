@@ -1,9 +1,10 @@
 package poker.entities;
 
 public class Estimate {
-	private static final float WORK_DAYS_PER_YEAR = 165;
-	private static final float WORK_DAYS_PER_MONTH = 22;
 	private static final float WORK_HOURS_PER_DAY = 8;
+	private static final float WORK_DAYS_PER_WEEK = 5;
+	private static final float WORK_DAYS_PER_MONTH = WORK_DAYS_PER_WEEK * 5;
+	private static final float WORK_DAYS_PER_YEAR = 165;
 	private int id;
 	private int task_id;
 	private String complexity_symbol;

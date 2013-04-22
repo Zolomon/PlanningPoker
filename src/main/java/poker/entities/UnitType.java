@@ -1,7 +1,7 @@
 package poker.entities;
 
 public enum UnitType {
-	PERSON_HOURS(1), PERSON_DAYS(2), PERSON_MONTHS(3), PERSON_YEARS(4);
+	PERSON_HOURS(1), PERSON_DAYS(2), PERSON_WEEK(3), PERSON_MONTHS(4), PERSON_YEARS(5);
 
 	private int code;
 

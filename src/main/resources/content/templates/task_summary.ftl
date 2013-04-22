@@ -9,8 +9,9 @@
 				<select id="estimation_unit" name="estimation_unit">
 				  <option value="1" <#if unit_id == 1>selected</#if>>Person Hours</option>
 				  <option value="2" <#if unit_id == 2>selected</#if>>Person Days</option>
-				  <option value="3" <#if unit_id == 3>selected</#if>>Person Months</option>
-				  <option value="4" <#if unit_id == 4>selected</#if>>Person Years</option>
+				  <option value="3" <#if unit_id == 3>selected</#if>>Person Weeks</option>
+				  <option value="4" <#if unit_id == 4>selected</#if>>Person Months</option>
+				  <option value="5" <#if unit_id == 5>selected</#if>>Person Years</option>
 				</select>
 				<button type="submit" class="inline btn btn-primary" style="margin-top: 6px;"><i class="icon-refresh icon-white"></i> Change Unit</button>
 		</form>

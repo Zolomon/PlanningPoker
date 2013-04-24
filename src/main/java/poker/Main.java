@@ -5,6 +5,8 @@ import static spark.Spark.post;
 import static spark.Spark.staticFileLocation;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -17,6 +19,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -40,6 +43,8 @@ import freemarker.template.TemplateException;
 public class Main {
 	private static final int		NO_CONSENSUS	= -1;
 	private static DatabaseManager	dm;
+	private static String ip;
+	private static int port;
 
 	private void debug(String msg) {
 		System.out.println(msg);
@@ -53,6 +58,9 @@ public class Main {
 
 			/* Merge data-model with template */
 
+			root.put("ip", ip);
+			root.put("port", port);
+			
 			Writer out = new StringWriter();
 			temp.process(root, out);
 			return out.toString();
@@ -72,6 +80,24 @@ public class Main {
 		Class.forName("org.sqlite.JDBC");
 
 		dm = new DatabaseManager(System.out);
+		
+		try {
+			File settings = new File("settings.txt");
+			if (settings.exists()) {
+				Scanner scanner = new Scanner(settings);
+				ip = scanner.nextLine();
+				port = scanner.nextInt();
+				
+				System.out.println(String.format("Setting server address to %s:%d", ip, port));
+			}
+			
+		} catch (FileNotFoundException e1) {
+			System.out.println("settings.txt not found.");
+			System.out.println("Using ip = localhost && port = 4567");
+			
+			ip = "localhost";
+			port = 4567;
+		}
 
 		final Configuration cfg = new Configuration();
 		try {

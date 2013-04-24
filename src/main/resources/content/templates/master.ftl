@@ -4,11 +4,11 @@
 	<head>
 		<title>${title?html}</title>
 		
-		<link href="http://localhost:4567/css/bootstrap.css" rel="stylesheet">
-	    <link href="http://localhost:4567/css/bootstrap-responsive.css" rel="stylesheet">
-	    <link href="http://localhost:4567/css/docs.css" rel="stylesheet">
-	    <link href="http://localhost:4567/js/google-code-prettify/prettify.css" rel="stylesheet">
-	    <link href="http://localhost:4567/img/favicon.png" rel="shortcut icon" type="image/x-icon" >
+		<link href="http://${ip}:${port?c}/css/bootstrap.css" rel="stylesheet">
+	    <link href="http://${ip}:${port?c}/css/bootstrap-responsive.css" rel="stylesheet">
+	    <link href="http://${ip}:${port?c}/css/docs.css" rel="stylesheet">
+	    <link href="http://${ip}:${port?c}/js/google-code-prettify/prettify.css" rel="stylesheet">
+	    <link href="http://${ip}:${port?c}/img/favicon.png" rel="shortcut icon" type="image/x-icon" >
 		<style>
 			body {
 				padding-top: 80px;

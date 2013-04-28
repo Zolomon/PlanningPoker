@@ -35,6 +35,7 @@ import spark.JettyLogger;
 import spark.Request;
 import spark.Response;
 import spark.Route;
+import freemarker.cache.ClassTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
@@ -43,8 +44,9 @@ import freemarker.template.TemplateException;
 public class Main {
 	private static final int		NO_CONSENSUS	= -1;
 	private static DatabaseManager	dm;
-	private static String ip;
-	private static int port;
+	private static String			ip;
+	private static int				port;
+	private static String			templatePath;
 
 	private void debug(String msg) {
 		System.out.println(msg);
@@ -60,7 +62,7 @@ public class Main {
 
 			root.put("ip", ip);
 			root.put("port", port);
-			
+
 			Writer out = new StringWriter();
 			temp.process(root, out);
 			return out.toString();
@@ -80,21 +82,23 @@ public class Main {
 		Class.forName("org.sqlite.JDBC");
 
 		dm = new DatabaseManager(System.out);
-		
+
 		try {
 			File settings = new File("settings.txt");
 			if (settings.exists()) {
 				Scanner scanner = new Scanner(settings);
+				templatePath = scanner.nextLine();
 				ip = scanner.nextLine();
 				port = scanner.nextInt();
-				
-				System.out.println(String.format("Setting server address to %s:%d", ip, port));
+
+				System.out.println(String.format("Setting server address to %s:%d with template path at '%s'", ip, port, templatePath));
 			}
-			
+
 		} catch (FileNotFoundException e1) {
 			System.out.println("settings.txt not found.");
 			System.out.println("Using ip = localhost && port = 4567");
-			
+
+			templatePath = ".";
 			ip = "localhost";
 			port = 4567;
 		}
@@ -102,8 +106,9 @@ public class Main {
 		final Configuration cfg = new Configuration();
 		try {
 
-			File file = new File(Thread.currentThread().getContextClassLoader().getResource("content/templates/")
-					.toURI());
+			File file = new File(templatePath);
+			//File file = new File(Thread.currentThread().getContextClassLoader().getResource("content/templates/")
+			//		.toURI());
 
 			cfg.setDirectoryForTemplateLoading(file);
 			cfg.setObjectWrapper(new DefaultObjectWrapper());
@@ -597,8 +602,13 @@ public class Main {
 
 					// Render
 					for (UserEstimate userEstimate : previousEstimations) {
-						sb.append("<span id=\"user-"+story_id+"-" + userEstimate.getUser().getId() + "\" class=\"label "
-								+ userEstimate.getColor() + "\" style=\"font-size: 100%; padding:8px; text-align:center; vertical-align:middle;\">");
+						sb.append("<span id=\"user-"
+								+ story_id
+								+ "-"
+								+ userEstimate.getUser().getId()
+								+ "\" class=\"label "
+								+ userEstimate.getColor()
+								+ "\" style=\"font-size: 100%; padding:8px; text-align:center; vertical-align:middle;\">");
 						sb.append("<strong>");
 						sb.append(userEstimate.getEstimate().getComplexitySymbol());
 						sb.append("</strong>");
